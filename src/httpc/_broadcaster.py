@@ -15,6 +15,10 @@ class BroadcastList(list, typing.Generic[T_co]):
     def bc(self) -> Broadcaster[T_co]:
         return Broadcaster(self)
 
+    @property
+    def chain(self) -> Chainer[T_co]:
+        return Chainer(self)
+
 
 class Broadcaster(FullDunder, typing.Generic[T_co]):
     __slots__ = ("__value",)
@@ -38,10 +42,10 @@ class Broadcaster(FullDunder, typing.Generic[T_co]):
             return BroadcastList(getattr(i, name) for i in self.__value)
 
     def __setattr__(self, name: str, value) -> None:
-        if name.startswith("_Broadcaster") and name.removeprefix("_Broadcaster") in self.__slots__:
+        if name == "_Broadcaster__value":
             object.__setattr__(self, name, value)
         else:
-            super().__setattr__(value)
+            super(Broadcaster).__setattr__(name, value)
 
     def __str__(self) -> str:
         return repr(self)
@@ -54,6 +58,17 @@ class Broadcaster(FullDunder, typing.Generic[T_co]):
 
     def repr(self) -> BroadcastList[str]:
         return BroadcastList(repr(i) for i in self.__value)
+
+
+class Chainer(Broadcaster, typing.Generic[T_co]):
+    __slots__ = ()
+
+    def __getattr__(self, name: str, /) -> Callable[..., BroadcastList[T_co]]:
+        def broadcaster(*args, **kwargs) -> BroadcastList[T_co]:
+            for i in self._Broadcaster__value:  # type: ignore
+                getattr(i, name)(*args, **kwargs)
+            return self._Broadcaster__value  # type: ignore
+        return broadcaster
 
 
 if typing.TYPE_CHECKING:
