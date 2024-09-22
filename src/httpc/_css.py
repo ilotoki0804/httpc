@@ -7,6 +7,9 @@ from httpx._models import Response
 
 from ._broadcaster import BroadcastList
 
+if typing.TYPE_CHECKING:
+    from ._broadcaster import NodeBroadcastList
+
 __all__ = ["CSSTool", "CSSResponse"]
 
 T = typing.TypeVar("T")
@@ -32,8 +35,8 @@ class CSSTool:
             raise ValueError(f"{self} does not have root node.")
         return result
 
-    def css(self, query: str) -> BroadcastList[Node]:
-        return BroadcastList(self.parse().css(query))
+    def css(self, query: str) -> NodeBroadcastList:
+        return BroadcastList(self.parse().css(query))  # type: ignore
 
     def css_only(self, query: str, remain_ok: bool = False) -> Node:
         css_result = self.parse().css(query)
