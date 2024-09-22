@@ -38,7 +38,7 @@ class Broadcaster(FullDunder, Generic[T_co]):
             return BroadcastList(getattr(i, name) for i in self.__value)
 
     def __setattr__(self, name: str, value) -> None:
-        if name.removeprefix("_Broadcaster") in self.__slots__:
+        if name.startswith("_Broadcaster") and name.removeprefix("_Broadcaster") in self.__slots__:
             object.__setattr__(self, name, value)
         else:
             super().__setattr__(value)
