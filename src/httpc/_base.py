@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from abc import abstractmethod
 import logging
 import re
 
@@ -14,11 +15,15 @@ def extract_headers(curl_command: str) -> dict[str, str]:
 
 
 class FullDunder:
+    @abstractmethod
+    def __getattr__(self, name: str, /):
+        raise NotImplementedError
+
     def __getattr(self, __name, *args, **kwargs):
-        return getattr(self, __name)(args, kwargs)
+        return self.__getattr__(__name)(*args, **kwargs)
 
     async def __agetattr(self, __name, *args, **kwargs):
-        return await getattr(self, __name)(args, kwargs)
+        return await self.__getattr__(__name)(*args, **kwargs)
 
     def __setattr__(self, *args, **kwargs):
         return self.__getattr("__setattr__", *args, **kwargs)
