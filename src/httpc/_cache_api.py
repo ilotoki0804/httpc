@@ -6,6 +6,10 @@ from collections import deque
 from . import _api as api
 
 __all__ = ["crequest", "cget", "coptions", "chead", "cpost", "cput", "cpatch", "cdelete"]
+
+# 시퀸스 대신 딕셔너리를 사용하면 키카 hashable해야 하고 심지어 (아마도) 더 느림.
+# 이 방식을 이용하면 이론상 더 느리지만 캐시 API는 production에서
+# 사용하기 위한 코드가 아니기 때문에 괜찮음
 _caches: deque[tuple[Any, Any, Any, Any]] = deque([], maxlen=127)
 
 
