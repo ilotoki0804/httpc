@@ -1,22 +1,22 @@
 from __future__ import annotations
 
-from typing import Generic, TypeVar
+import typing
 from collections.abc import Callable
 
 from ._base import FullDunder
 
 __all__ = ["BroadcastList"]
 
-T_co = TypeVar("T_co", covariant=True)
+T_co = typing.TypeVar("T_co", covariant=True)
 
 
-class BroadcastList(list, Generic[T_co]):
+class BroadcastList(list, typing.Generic[T_co]):
     @property
     def bc(self) -> Broadcaster[T_co]:
         return Broadcaster(self)
 
 
-class Broadcaster(FullDunder, Generic[T_co]):
+class Broadcaster(FullDunder, typing.Generic[T_co]):
     __slots__ = ("__value",)
 
     def __init__(self, sequence: BroadcastList[T_co], /) -> None:
@@ -56,10 +56,10 @@ class Broadcaster(FullDunder, Generic[T_co]):
         return BroadcastList(repr(i) for i in self.__value)
 
 
-if TYPE_CHECKING:
+if typing.TYPE_CHECKING:
     from collections.abc import Iterator
     from selectolax.parser import Node, Selector, _Attributes
-    DefaultT = TypeVar("DefaultT")
+    DefaultT = typing.TypeVar("DefaultT")
 
     class NodeBroadcastList(BroadcastList[Node]):
         @property
@@ -157,17 +157,17 @@ if TYPE_CHECKING:
             """Returns True if CSS selector matches a node."""
             ...
 
-        @overload
+        @typing.overload
         def css_first(
             self, query: str, default: None = None, strict: bool = False
         ) -> BroadcastList[Node | None]: ...
 
-        @overload
+        @typing.overload
         def css_first(
             self, query: str, default: DefaultT, strict: bool = False
         ) -> BroadcastList[Node | DefaultT]: ...
 
-        def css_first(self, query, default=None, strict=False) -> Any:
+        def css_first(self, query, default=None, strict=False) -> typing.Any:
             """Evaluate CSS selector against current node and its child nodes."""
             ...
 
