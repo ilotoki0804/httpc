@@ -3,6 +3,7 @@ from ._base import extract_headers
 from ._broadcaster import BroadcastList
 from ._client import AsyncClient, Client
 from ._css import CSSResponse, CSSTool
+from ._options import HEADERS, ClientOptions, common
 
 __version__ = "0.2.0"
 __all__ = [
@@ -21,4 +22,7 @@ __all__ = [
     "Client",
     "CSSResponse",
     "CSSTool",
+    "HEADERS",
+    "ClientOptions",
+    "common"
 ]
