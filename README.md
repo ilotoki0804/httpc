@@ -25,3 +25,7 @@ ValueError: Query 'div' matched with 47 nodes.
 httpx.HTTPStatusError: Client error '400 BAD REQUEST' for url 'https://httpbin.org/status/400'
 For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400
 ```
+
+## Release Note
+
+* 0.2.0: Initial commit
