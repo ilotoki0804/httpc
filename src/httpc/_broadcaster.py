@@ -35,6 +35,7 @@ class Broadcaster(FullDunder, typing.Generic[T_co]):
             # broadcast callables
             def broadcaster(*args, **kwargs):
                 return BroadcastList(getattr(i, name)(*args, **kwargs) for i in self.__value)
+
             return broadcaster
 
         else:
@@ -68,12 +69,14 @@ class Chainer(Broadcaster, typing.Generic[T_co]):
             for i in self._Broadcaster__value:  # type: ignore
                 getattr(i, name)(*args, **kwargs)
             return self._Broadcaster__value  # type: ignore
+
         return broadcaster
 
 
 if typing.TYPE_CHECKING:
     from collections.abc import Iterator
     from selectolax.parser import Node, Selector, _Attributes
+
     DefaultT = typing.TypeVar("DefaultT")
 
     class NodeBroadcastList(BroadcastList[Node]):
@@ -108,7 +111,7 @@ if typing.TYPE_CHECKING:
             ...
 
         def __hash__(self) -> BroadcastList[int]:
-            """ Get the hash of this node
+            """Get the hash of this node
             :return: int
             """
             ...
@@ -173,14 +176,10 @@ if typing.TYPE_CHECKING:
             ...
 
         @typing.overload
-        def css_first(
-            self, query: str, default: None = None, strict: bool = False
-        ) -> BroadcastList[Node | None]: ...
+        def css_first(self, query: str, default: None = None, strict: bool = False) -> BroadcastList[Node | None]: ...
 
         @typing.overload
-        def css_first(
-            self, query: str, default: DefaultT, strict: bool = False
-        ) -> BroadcastList[Node | DefaultT]: ...
+        def css_first(self, query: str, default: DefaultT, strict: bool = False) -> BroadcastList[Node | DefaultT]: ...
 
         def css_first(self, query, default=None, strict=False) -> typing.Any:
             """Evaluate CSS selector against current node and its child nodes."""
