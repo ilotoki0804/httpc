@@ -11,6 +11,10 @@ T_co = typing.TypeVar("T_co", covariant=True)
 
 
 class BroadcastList(list, typing.Generic[T_co]):
+    def __call__(self, *args, **kwargs) -> typing.Self:
+        # In order to empty broadcasting works properly, it needs to swallow calls.
+        return self
+
     @property
     def bc(self) -> Broadcaster[T_co]:
         return Broadcaster(self)
@@ -31,7 +35,9 @@ class Broadcaster(FullDunder, typing.Generic[T_co]):
             # Skip operations
             return BroadcastList()
 
-        if callable(getattr(self.__value[0], name)):
+        first_attr = getattr(self.__value[0], name)
+        # Treat BroadcastList and FullDunder as attribute, not callable.
+        if not isinstance(first_attr, (BroadcastList, FullDunder)) and callable(first_attr):
             # broadcast callables
             def broadcaster(*args, **kwargs):
                 return BroadcastList(getattr(i, name)(*args, **kwargs) for i in self.__value)
