@@ -6,7 +6,7 @@ authors = [
 description = "httpx with css."
 license = "MIT"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 keywords = ["httpx", "request", "css", "soup", "selectolax"]
 classifiers = [
     "License :: OSI Approved :: MIT License",
