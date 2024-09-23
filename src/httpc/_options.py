@@ -4,21 +4,22 @@ import sys
 import typing
 from dataclasses import asdict, dataclass, fields
 
-from httpx._client import EventHook
-from httpx._config import Limits
-from httpx._transports.base import BaseTransport
-from httpx._types import (
-    AuthTypes,
-    CertTypes,
-    CookieTypes,
-    HeaderTypes,
-    ProxiesTypes,
-    ProxyTypes,
-    QueryParamTypes,
-    TimeoutTypes,
-    URLTypes,
-    VerifyTypes,
-)
+if typing.TYPE_CHECKING:
+    from httpx._client import EventHook
+    from httpx._config import Limits
+    from httpx._transports.base import BaseTransport
+    from httpx._types import (
+        AuthTypes,
+        CertTypes,
+        CookieTypes,
+        HeaderTypes,
+        ProxiesTypes,
+        ProxyTypes,
+        QueryParamTypes,
+        TimeoutTypes,
+        URLTypes,
+        VerifyTypes,
+    )
 
 from httpc._api import request
 from httpc._client import AsyncClient, Client

@@ -4,21 +4,23 @@ import typing
 from contextlib import contextmanager
 
 from httpx._config import DEFAULT_TIMEOUT_CONFIG
-from httpx._types import (
-    AuthTypes,
-    CertTypes,
-    CookieTypes,
-    HeaderTypes,
-    ProxiesTypes,
-    ProxyTypes,
-    QueryParamTypes,
-    RequestContent,
-    RequestData,
-    RequestFiles,
-    TimeoutTypes,
-    VerifyTypes,
-)
-from httpx._urls import URL
+
+if typing.TYPE_CHECKING:
+    from httpx._types import (
+        AuthTypes,
+        CertTypes,
+        CookieTypes,
+        HeaderTypes,
+        ProxiesTypes,
+        ProxyTypes,
+        QueryParamTypes,
+        RequestContent,
+        RequestData,
+        RequestFiles,
+        TimeoutTypes,
+        VerifyTypes,
+    )
+    from httpx._urls import URL
 
 from ._client import Client
 from ._css import CSSResponse
