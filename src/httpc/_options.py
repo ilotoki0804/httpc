@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 import typing
 from dataclasses import asdict, dataclass, fields
 
@@ -66,7 +67,13 @@ _REQUEST_KEYS = {
 }
 
 
-@dataclass(slots=True)
+if sys.version_info >= (3, 10):
+    _dataclass_args = {"slots": True}
+else:
+    _dataclass_args = {}
+
+
+@dataclass(**_dataclass_args)
 class ClientOptions:
     auth: AuthTypes | None = None
     params: QueryParamTypes | None = None
