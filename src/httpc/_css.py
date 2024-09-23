@@ -23,7 +23,10 @@ class CSSTool:
         if text is not None:
             self.text: str = text
 
-    def parse(self) -> HTMLParser:
+    def parse(self, refresh: bool = False) -> HTMLParser:
+        if refresh:
+            self._cache = HTMLParser(self.text)
+            return self._cache
         try:
             return self._cache
         except AttributeError:
