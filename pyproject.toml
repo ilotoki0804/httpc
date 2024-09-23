@@ -52,7 +52,7 @@ exclude_also = [
 ]
 
 [tool.hatch.version]
-path = "src/httpc/__init__.py"
+path = "src/httpc/_base.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/httpc"]

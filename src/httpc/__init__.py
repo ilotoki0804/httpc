@@ -5,7 +5,6 @@ from ._client import AsyncClient, Client
 from ._css import CSSResponse, CSSTool
 from ._options import HEADERS, ClientOptions, common
 
-__version__ = "0.2.0"
 __all__ = [
     "delete",
     "get",
