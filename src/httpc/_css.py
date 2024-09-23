@@ -13,6 +13,7 @@ if typing.TYPE_CHECKING:
 __all__ = ["CSSTool", "CSSResponse"]
 
 T = typing.TypeVar("T")
+_ABSENT = object()
 
 
 class CSSTool:
@@ -38,25 +39,25 @@ class CSSTool:
     def css(self, query: str) -> NodeBroadcastList:
         return BroadcastList(self.parse().css(query))  # type: ignore
 
-    def css_only(self, query: str, remain_ok: bool = False) -> Node:
-        css_result = self.parse().css(query)
-        css_result_len = len(css_result)
+    @typing.overload
+    def single(self, query: str, *, remain_ok: bool = False) -> Node: ...
 
-        if css_result_len == 0:
-            raise ValueError(f"Query {query!r} matched with no nodes.")
-        elif remain_ok or css_result_len == 1:
+    @typing.overload
+    def single(self, query: str, default: T, *, remain_ok: bool = False) -> Node | T: ...
+
+    def single(self, query, default=_ABSENT, *, remain_ok=False):
+        css_result = self.parse().css(query)
+        length = len(css_result)
+
+        if length == 0:
+            if default is _ABSENT:
+                raise ValueError(f"Query {query!r} matched with no nodes.")
+            else:
+                return default
+        elif remain_ok or length == 1:
             return css_result.pop()
         else:
-            raise ValueError(f"Query {query!r} matched with {css_result_len} nodes.")
-
-    @typing.overload
-    def css_one(self, query: str) -> Node | None: ...
-
-    @typing.overload
-    def css_one(self, query: str, default: T) -> Node | T: ...
-
-    def css_one(self, query, default=None):
-        return self.parse().css_first(query, default=default)
+            raise ValueError(f"Query {query!r} matched with {length} nodes.")
 
 
 class CSSResponse(Response, CSSTool):
