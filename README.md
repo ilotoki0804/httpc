@@ -2,6 +2,12 @@
 
 **httpx with CSS**
 
+## Installation
+
+```console
+pip install -U httpc
+```
+
 ## Examples
 
 ```python
