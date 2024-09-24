@@ -36,12 +36,6 @@ class CSSTool:
             self._cache = HTMLParser(self.text)
             return self._cache
 
-    def select(self, query: str, *, new: bool = False) -> Selector:
-        result = self.parse(new=new).select(query)
-        if result is None:
-            raise ValueError(f"{self} does not have root node.")
-        return result
-
     def css(self, query: str, *, new: bool = False) -> NodeBroadcastList:
         return BroadcastList(self.parse(new=new).css(query))  # type: ignore
 
