@@ -5,7 +5,7 @@ def test_broadcast_list():
     my = BroadcastList(list(i) for i in ("hello", "world", "google", "ha"))
     assert my.bc[1] == ["e", "o", "o", "a"]
 
-    assert my.chain.sort().bc[1] == ['h', 'l', 'g', 'h']
+    assert my.chain.sort().bc[1] == ["h", "l", "g", "h"]
 
     my = BroadcastList([])
     assert my.bc.anything == BroadcastList([])
@@ -30,11 +30,17 @@ def test_broadcast_list():
     assert my.bc.attr == [4, "hello", 4.5, [3]]
 
     assert my.bc.returns_broadcast_list == BroadcastList(
-        [BroadcastList([4]), BroadcastList(["hello"]), BroadcastList([4.5]), BroadcastList([[3]])])
+        [BroadcastList([4]), BroadcastList(["hello"]), BroadcastList([4.5]), BroadcastList([[3]])]
+    )
 
     assert my.bc.attr.bc.str() == BroadcastList(["4", "hello", "4.5", "[3]"])
     assert my.bc.attr.bc.repr() == BroadcastList(["4", "'hello'", "4.5", "[3]"])
     assert str(my.bc) == "Broadcaster([Attr(4), Attr('hello'), Attr(4.5), Attr([3])])"
     assert repr(my.bc) == "Broadcaster([Attr(4), Attr('hello'), Attr(4.5), Attr([3])])"
 
-    assert my.bc.returns_broadcaster.bc.str() == ['Broadcaster([4])', "Broadcaster(['hello'])", 'Broadcaster([4.5])', 'Broadcaster([[3]])']
+    assert my.bc.returns_broadcaster.bc.str() == [
+        "Broadcaster([4])",
+        "Broadcaster(['hello'])",
+        "Broadcaster([4.5])",
+        "Broadcaster([[3]])",
+    ]
