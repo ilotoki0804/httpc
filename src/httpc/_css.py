@@ -23,33 +23,36 @@ class CSSTool:
         if text is not None:
             self.text: str = text
 
-    def parse(self, refresh: bool = False) -> HTMLParser:
+    def parse(self, *, new: bool = False, refresh: bool = False) -> HTMLParser:
         if refresh:
             self._cache = HTMLParser(self.text)
-            return self._cache
+
+        if new:
+            return HTMLParser(self.text)
+
         try:
             return self._cache
         except AttributeError:
             self._cache = HTMLParser(self.text)
             return self._cache
 
-    def select(self, query: str) -> Selector:
-        result = self.parse().select(query)
+    def select(self, query: str, *, new: bool = False) -> Selector:
+        result = self.parse(new=new).select(query)
         if result is None:
             raise ValueError(f"{self} does not have root node.")
         return result
 
-    def css(self, query: str) -> NodeBroadcastList:
-        return BroadcastList(self.parse().css(query))  # type: ignore
+    def css(self, query: str, *, new: bool = False) -> NodeBroadcastList:
+        return BroadcastList(self.parse(new=new).css(query))  # type: ignore
 
     @typing.overload
-    def single(self, query: str, *, remain_ok: bool = False) -> Node: ...
+    def single(self, query: str, *, remain_ok: bool = False, new: bool = False) -> Node: ...
 
     @typing.overload
-    def single(self, query: str, default: T, *, remain_ok: bool = False) -> Node | T: ...
+    def single(self, query: str, default: T, *, remain_ok: bool = False, new: bool = False) -> Node | T: ...
 
-    def single(self, query, default=_ABSENT, *, remain_ok=False):
-        css_result = self.parse().css(query)
+    def single(self, query, default=_ABSENT, *, remain_ok=False, new: bool = False):
+        css_result = self.parse(new=new).css(query)
         length = len(css_result)
 
         if length == 0:
