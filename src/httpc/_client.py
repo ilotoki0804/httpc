@@ -133,6 +133,12 @@ class Client(HttpxClient):
                     timeout=timeout,
                     extensions=extensions,
                 )
+
+                # Retry when status code is server error.
+                # Exceptions of HTTP 4XX does not trigger retry.
+                if raise_for_status and response.status_code >= 500:
+                    response.raise_for_status()
+
             except Exception as exc:
                 if retry == 1:
                     raise
@@ -142,7 +148,6 @@ class Client(HttpxClient):
                 if last_exc:
                     logger.warning(f"Successfully retrieve {url!r}")
 
-                # Exceptions from raise_for_status does not trigger retry.
                 # If raise_for_status is False, raise_for_status won't be checked.
                 if raise_for_status or raise_for_status is None and self.raise_for_status:
                     response.raise_for_status()
@@ -203,10 +208,16 @@ class Client(HttpxClient):
                     logger.warning(f"Successfully retrieve {url!r}")
 
                 with streamer as stream:
-                    # Exceptions from raise_for_status does not trigger retry.
                     # If raise_for_status is False, raise_for_status won't be checked.
                     if raise_for_status or raise_for_status is None and self.raise_for_status:
-                        stream.raise_for_status()
+                        try:
+                            stream.raise_for_status()
+                        except Exception as exc:
+                            # Exceptions of HTTP 4XX does not trigger retry.
+                            if stream.status_code >= 500:
+                                last_exc = exc
+                                continue
+                            raise
 
                     yield CSSResponse(stream)
                     return
