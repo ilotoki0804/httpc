@@ -209,6 +209,7 @@ class Client(HttpxClient):
                         stream.raise_for_status()
 
                     yield CSSResponse(stream)
+                    return
 
         if last_exc is None:
             raise ValueError(f"Retry value must be natural number, but it's {retry!r}")
