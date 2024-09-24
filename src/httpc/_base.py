@@ -4,7 +4,7 @@ from abc import abstractmethod
 import logging
 import re
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 logger = logging.getLogger("httpc")
 
