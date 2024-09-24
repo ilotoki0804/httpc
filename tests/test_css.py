@@ -185,7 +185,7 @@ def res() -> CSSTool:
 
 
 def test_single(soup):
-    assert soup.css("kbd").bc.text() == ['f', 's', 'm', 'x', 'c', '[', ']', '?']
+    assert soup.match("kbd").bc.text() == ['f', 's', 'm', 'x', 'c', '[', ']', '?']
 
     assert "Coverage report" in soup.single("h1").text()
 

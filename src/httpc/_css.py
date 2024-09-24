@@ -36,7 +36,7 @@ class CSSTool:
             self._cache = HTMLParser(self.text)
             return self._cache
 
-    def css(self, query: str, *, new: bool = False) -> NodeBroadcastList:
+    def match(self, query: str, *, new: bool = False) -> NodeBroadcastList:
         return BroadcastList(self.parse(new=new).css(query))  # type: ignore
 
     @typing.overload
