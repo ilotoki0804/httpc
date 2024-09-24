@@ -7,7 +7,6 @@ import re
 __version__ = "0.2.0"
 
 logger = logging.getLogger("httpc")
-logger.setLevel(logging.INFO)
 
 
 def extract_headers(curl_command: str) -> dict[str, str]:

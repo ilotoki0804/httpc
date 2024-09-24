@@ -140,7 +140,7 @@ class Client(HttpxClient):
                 last_exc = exc
             else:
                 if last_exc:
-                    logger.info(f"Successfully retrieve {url!r}")
+                    logger.warning(f"Successfully retrieve {url!r}")
 
                 # Exceptions from raise_for_status does not trigger retry.
                 # If raise_for_status is False, raise_for_status won't be checked.
@@ -200,7 +200,7 @@ class Client(HttpxClient):
                 last_exc = exc
             else:
                 if last_exc:
-                    logger.info(f"Successfully retrieve {url!r}")
+                    logger.warning(f"Successfully retrieve {url!r}")
 
                 with streamer as stream:
                     # Exceptions from raise_for_status does not trigger retry.
@@ -242,7 +242,7 @@ class Client(HttpxClient):
     #             last_exc = exc
     #         else:
     #             if last_exc:
-    #                 logger.info(f"Successfully retrieve {request!r}")
+    #                 logger.warning(f"Successfully retrieve {request!r}")
 
     #             # Exceptions from raise_for_status does not trigger retry.
     #             if raise_for_status or self.raise_for_status:
@@ -612,7 +612,7 @@ class AsyncClient(HttpxAsyncClient):
                 last_exc = exc
             else:
                 if last_exc:
-                    logger.info(f"Successfully retrieve {url!r}")
+                    logger.warning(f"Successfully retrieve {url!r}")
 
                 # Exceptions from raise_for_status does not trigger retry.
                 if raise_for_status or self.raise_for_status:
@@ -671,7 +671,7 @@ class AsyncClient(HttpxAsyncClient):
                 last_exc = exc
             else:
                 if last_exc:
-                    logger.info(f"Successfully retrieve {url!r}")
+                    logger.warning(f"Successfully retrieve {url!r}")
 
                 async with streamer as stream:
                     # Exceptions from raise_for_status does not trigger retry.
@@ -712,7 +712,7 @@ class AsyncClient(HttpxAsyncClient):
     #             last_exc = exc
     #         else:
     #             if last_exc:
-    #                 logger.info(f"Successfully retrieve {request!r}")
+    #                 logger.warning(f"Successfully retrieve {request!r}")
 
     #             # Exceptions from raise_for_status does not trigger retry.
     #             if raise_for_status or self.raise_for_status:
