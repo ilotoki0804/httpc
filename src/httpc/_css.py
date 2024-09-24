@@ -51,13 +51,22 @@ class CSSTool:
 
         if length == 0:
             if default is _ABSENT:
-                raise ValueError(f"Query {query!r} matched with no nodes.")
+                raise ValueError(f"Query {query!r} matched with no nodes {self._get_url_note()}.")
             else:
                 return default
         elif remain_ok or length == 1:
             return css_result.pop()
         else:
-            raise ValueError(f"Query {query!r} matched with {length} nodes.")
+            raise ValueError(f"Query {query!r} matched with {length} nodes {self._get_url_note()}.")
+
+    def _get_url_note(self) -> str:
+        try:
+            url = self.url  # type: ignore
+        except AttributeError:
+            url_note = ""
+        else:
+            url_note = f"(error from '{url}')"
+        return url_note
 
 
 class CSSResponse(Response, CSSTool):

@@ -1,3 +1,4 @@
+import pickle
 import pytest
 from httpc import CSSTool
 
@@ -176,6 +177,13 @@ def soup() -> CSSTool:
     return CSSTool(SAMPLE_HTML)
 
 
+@pytest.fixture
+def res() -> CSSTool:
+    # response from https://www.python.org/
+    with open("./tests/resources/response.pickle", "rb") as f:
+        return pickle.load(f)
+
+
 def test_single(soup):
     assert soup.css("kbd").bc.text() == ['f', 's', 'm', 'x', 'c', '[', ']', '?']
 
@@ -197,3 +205,11 @@ def test_parse(soup):
     assert header.tag == "header"
     assert main.tag == "main"
     assert footer.tag == "footer"
+
+
+def test_res(res):
+    assert res.url == "https://www.python.org/"
+    with pytest.raises(ValueError, match=r"https://www.python.org/"):
+        res.single("div")
+    with pytest.raises(ValueError, match=r"https://www.python.org/"):
+        res.single("no-matching-result")
