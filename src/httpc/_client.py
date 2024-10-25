@@ -13,7 +13,7 @@ from httpx._config import (
     Limits,
 )
 
-from ._css import CSSResponse
+from ._parse import Response
 from ._base import logger
 
 if typing.TYPE_CHECKING:
@@ -113,7 +113,7 @@ class Client(HttpxClient):
         extensions: RequestExtensions | None = None,
         retry: int | None = None,
         raise_for_status: bool | None = None,
-    ) -> CSSResponse:
+    ) -> Response:
         last_exc = None
         retry = retry or self.retry or 1
         for _ in range(retry):
@@ -152,7 +152,7 @@ class Client(HttpxClient):
                 if raise_for_status or raise_for_status is None and self.raise_for_status:
                     response.raise_for_status()
 
-                return CSSResponse(response)
+                return Response(response)
 
         if last_exc is None:
             raise ValueError(f"Retry value must be natural number, but it's {retry!r}")
@@ -178,7 +178,7 @@ class Client(HttpxClient):
         extensions: RequestExtensions | None = None,
         retry: int | None = None,
         raise_for_status: bool | None = None,
-    ) -> typing.Iterator[CSSResponse]:
+    ) -> typing.Iterator[Response]:
         last_exc = None
         retry = retry or self.retry or 1
         for _ in range(retry):
@@ -219,7 +219,7 @@ class Client(HttpxClient):
                                 continue
                             raise
 
-                    yield CSSResponse(stream)
+                    yield Response(stream)
                     return
 
         if last_exc is None:
@@ -280,7 +280,7 @@ class Client(HttpxClient):
         extensions: RequestExtensions | None = None,
         retry: int | None = None,
         raise_for_status: bool | None = None,
-    ) -> CSSResponse:
+    ) -> Response:
         """
         Send a `GET` request.
 
@@ -313,7 +313,7 @@ class Client(HttpxClient):
         extensions: RequestExtensions | None = None,
         retry: int | None = None,
         raise_for_status: bool | None = None,
-    ) -> CSSResponse:
+    ) -> Response:
         """
         Send an `OPTIONS` request.
 
@@ -346,7 +346,7 @@ class Client(HttpxClient):
         extensions: RequestExtensions | None = None,
         retry: int | None = None,
         raise_for_status: bool | None = None,
-    ) -> CSSResponse:
+    ) -> Response:
         """
         Send a `HEAD` request.
 
@@ -383,7 +383,7 @@ class Client(HttpxClient):
         extensions: RequestExtensions | None = None,
         retry: int | None = None,
         raise_for_status: bool | None = None,
-    ) -> CSSResponse:
+    ) -> Response:
         """
         Send a `POST` request.
 
@@ -424,7 +424,7 @@ class Client(HttpxClient):
         extensions: RequestExtensions | None = None,
         retry: int | None = None,
         raise_for_status: bool | None = None,
-    ) -> CSSResponse:
+    ) -> Response:
         """
         Send a `PUT` request.
 
@@ -465,7 +465,7 @@ class Client(HttpxClient):
         extensions: RequestExtensions | None = None,
         retry: int | None = None,
         raise_for_status: bool | None = None,
-    ) -> CSSResponse:
+    ) -> Response:
         """
         Send a `PATCH` request.
 
@@ -502,7 +502,7 @@ class Client(HttpxClient):
         extensions: RequestExtensions | None = None,
         retry: int | None = None,
         raise_for_status: bool | None = None,
-    ) -> CSSResponse:
+    ) -> Response:
         """
         Send a `DELETE` request.
 
@@ -597,7 +597,7 @@ class AsyncClient(HttpxAsyncClient):
         extensions: RequestExtensions | None = None,
         retry: int | None = None,
         raise_for_status: bool | None = None,
-    ) -> CSSResponse:
+    ) -> Response:
         last_exc = None
         retry = retry or self.retry or 1
         for _ in range(retry):
@@ -630,7 +630,7 @@ class AsyncClient(HttpxAsyncClient):
                 if raise_for_status or self.raise_for_status:
                     response.raise_for_status()
 
-                return CSSResponse(response)
+                return Response(response)
 
         if last_exc is None:
             raise ValueError(f"Retry value must be natural number, but it's {retry!r}")
@@ -656,7 +656,7 @@ class AsyncClient(HttpxAsyncClient):
         extensions: RequestExtensions | None = None,
         retry: int | None = None,
         raise_for_status: bool | None = None,
-    ) -> typing.AsyncIterator[CSSResponse]:
+    ) -> typing.AsyncIterator[Response]:
         last_exc = None
         retry = retry or self.retry or 1
         for _ in range(retry):
@@ -691,7 +691,7 @@ class AsyncClient(HttpxAsyncClient):
                     if raise_for_status or raise_for_status is None and self.raise_for_status:
                         stream.raise_for_status()
 
-                    yield CSSResponse(stream)
+                    yield Response(stream)
 
         if last_exc is None:
             raise ValueError(f"Retry value must be natural number, but it's {retry!r}")
@@ -750,7 +750,7 @@ class AsyncClient(HttpxAsyncClient):
         extensions: RequestExtensions | None = None,
         retry: int | None = None,
         raise_for_status: bool | None = None,
-    ) -> CSSResponse:
+    ) -> Response:
         """
         Send a `GET` request.
 
@@ -783,7 +783,7 @@ class AsyncClient(HttpxAsyncClient):
         extensions: RequestExtensions | None = None,
         retry: int | None = None,
         raise_for_status: bool | None = None,
-    ) -> CSSResponse:
+    ) -> Response:
         """
         Send an `OPTIONS` request.
 
@@ -816,7 +816,7 @@ class AsyncClient(HttpxAsyncClient):
         extensions: RequestExtensions | None = None,
         retry: int | None = None,
         raise_for_status: bool | None = None,
-    ) -> CSSResponse:
+    ) -> Response:
         """
         Send a `HEAD` request.
 
@@ -853,7 +853,7 @@ class AsyncClient(HttpxAsyncClient):
         extensions: RequestExtensions | None = None,
         retry: int | None = None,
         raise_for_status: bool | None = None,
-    ) -> CSSResponse:
+    ) -> Response:
         """
         Send a `POST` request.
 
@@ -894,7 +894,7 @@ class AsyncClient(HttpxAsyncClient):
         extensions: RequestExtensions | None = None,
         retry: int | None = None,
         raise_for_status: bool | None = None,
-    ) -> CSSResponse:
+    ) -> Response:
         """
         Send a `PUT` request.
 
@@ -935,7 +935,7 @@ class AsyncClient(HttpxAsyncClient):
         extensions: RequestExtensions | None = None,
         retry: int | None = None,
         raise_for_status: bool | None = None,
-    ) -> CSSResponse:
+    ) -> Response:
         """
         Send a `PATCH` request.
 
@@ -972,7 +972,7 @@ class AsyncClient(HttpxAsyncClient):
         extensions: RequestExtensions | None = None,
         retry: int | None = None,
         raise_for_status: bool | None = None,
-    ) -> CSSResponse:
+    ) -> Response:
         """
         Send a `DELETE` request.
 

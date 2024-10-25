@@ -23,7 +23,7 @@ if typing.TYPE_CHECKING:
 
 from httpc._api import request
 from httpc._client import AsyncClient, Client
-from httpc._css import CSSResponse
+from httpc._parse import Response
 
 __all__ = [
     "HEADERS",
@@ -106,7 +106,7 @@ class ClientOptions:
     def async_client(self) -> AsyncClient:
         return AsyncClient(**self.filled_options())
 
-    def request(self, *args, **kwargs) -> CSSResponse:
+    def request(self, *args, **kwargs) -> Response:
         options = {
             key: value
             for key, value in self.filled_options().items()
@@ -115,25 +115,25 @@ class ClientOptions:
         options.update(kwargs)
         return request(*args, **options)
 
-    def get(self, *args, **kwargs) -> CSSResponse:
+    def get(self, *args, **kwargs) -> Response:
         return self.request("GET", *args, **kwargs)
 
-    def options(self, *args, **kwargs) -> CSSResponse:
+    def options(self, *args, **kwargs) -> Response:
         return self.request("OPTIONS", *args, **kwargs)
 
-    def head(self, *args, **kwargs) -> CSSResponse:
+    def head(self, *args, **kwargs) -> Response:
         return self.request("HEAD", *args, **kwargs)
 
-    def post(self, *args, **kwargs) -> CSSResponse:
+    def post(self, *args, **kwargs) -> Response:
         return self.request("POST", *args, **kwargs)
 
-    def put(self, *args, **kwargs) -> CSSResponse:
+    def put(self, *args, **kwargs) -> Response:
         return self.request("PUT", *args, **kwargs)
 
-    def patch(self, *args, **kwargs) -> CSSResponse:
+    def patch(self, *args, **kwargs) -> Response:
         return self.request("PATCH", *args, **kwargs)
 
-    def delete(self, *args, **kwargs) -> CSSResponse:
+    def delete(self, *args, **kwargs) -> Response:
         return self.request("DELETE", *args, **kwargs)
 
 

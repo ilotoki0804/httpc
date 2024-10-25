@@ -1,6 +1,6 @@
 import pickle
 import pytest
-from httpc import CSSTool
+from httpc import ParseTool
 
 SAMPLE_HTML = R"""<!DOCTYPE html>
 <html lang="en">
@@ -173,12 +173,12 @@ SAMPLE_HTML = R"""<!DOCTYPE html>
 
 
 @pytest.fixture
-def soup() -> CSSTool:
-    return CSSTool(SAMPLE_HTML)
+def soup() -> ParseTool:
+    return ParseTool(SAMPLE_HTML)
 
 
 @pytest.fixture
-def res() -> CSSTool:
+def res() -> ParseTool:
     # response from https://www.python.org/
     with open("./tests/resources/response.pickle", "rb") as f:
         return pickle.load(f)

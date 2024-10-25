@@ -23,7 +23,7 @@ if typing.TYPE_CHECKING:
     from httpx._urls import URL
 
 from ._client import Client
-from ._css import CSSResponse
+from ._parse import Response
 
 __all__ = [
     "delete",
@@ -59,7 +59,7 @@ def request(
     trust_env: bool = True,
     retry: int | None = None,
     raise_for_status: bool = False,
-) -> CSSResponse:
+) -> Response:
     with Client(
         cookies=cookies,
         proxy=proxy,
@@ -107,7 +107,7 @@ def stream(
     trust_env: bool = True,
     retry: int | None = None,
     raise_for_status: bool = False,
-) -> typing.Iterator[CSSResponse]:
+) -> typing.Iterator[Response]:
     with Client(
         cookies=cookies,
         proxy=proxy,
@@ -150,7 +150,7 @@ def get(
     trust_env: bool = True,
     retry: int | None = None,
     raise_for_status: bool = False,
-) -> CSSResponse:
+) -> Response:
     return request(
         "GET",
         url,
@@ -186,7 +186,7 @@ def options(
     trust_env: bool = True,
     retry: int | None = None,
     raise_for_status: bool = False,
-) -> CSSResponse:
+) -> Response:
     return request(
         "OPTIONS",
         url,
@@ -222,7 +222,7 @@ def head(
     trust_env: bool = True,
     retry: int | None = None,
     raise_for_status: bool = False,
-) -> CSSResponse:
+) -> Response:
     return request(
         "HEAD",
         url,
@@ -262,7 +262,7 @@ def post(
     trust_env: bool = True,
     retry: int | None = None,
     raise_for_status: bool = False,
-) -> CSSResponse:
+) -> Response:
     return request(
         "POST",
         url,
@@ -306,7 +306,7 @@ def put(
     trust_env: bool = True,
     retry: int | None = None,
     raise_for_status: bool = False,
-) -> CSSResponse:
+) -> Response:
     return request(
         "PUT",
         url,
@@ -350,7 +350,7 @@ def patch(
     trust_env: bool = True,
     retry: int | None = None,
     raise_for_status: bool = False,
-) -> CSSResponse:
+) -> Response:
     return request(
         "PATCH",
         url,
@@ -390,7 +390,7 @@ def delete(
     trust_env: bool = True,
     retry: int | None = None,
     raise_for_status: bool = False,
-) -> CSSResponse:
+) -> Response:
     return request(
         "DELETE",
         url,
