@@ -7,27 +7,27 @@ from ._base import FullDunder
 
 __all__ = ["BroadcastList"]
 
-T_co = typing.TypeVar("T_co", covariant=True)
+T = typing.TypeVar("T")
 
 
-class BroadcastList(list, typing.Generic[T_co]):
+class BroadcastList(typing.Generic[T], list[T]):
     def __call__(self, *args, **kwargs) -> typing.Self:
         # In order to empty broadcasting works properly, it needs to swallow calls.
         return self
 
     @property
-    def bc(self) -> Broadcaster[T_co]:
+    def bc(self) -> Broadcaster[T]:
         return Broadcaster(self)
 
     @property
-    def chain(self) -> Chainer[T_co]:
+    def chain(self) -> Chainer[T]:
         return Chainer(self)
 
 
-class Broadcaster(FullDunder, typing.Generic[T_co]):
+class Broadcaster(typing.Generic[T], FullDunder):
     __slots__ = ("__value",)
 
-    def __init__(self, sequence: BroadcastList[T_co], /) -> None:
+    def __init__(self, sequence: BroadcastList[T], /) -> None:
         self.__value = sequence
 
     def __getattr__(self, name: str, /) -> Callable[..., BroadcastList] | BroadcastList:
@@ -67,11 +67,11 @@ class Broadcaster(FullDunder, typing.Generic[T_co]):
         return BroadcastList(repr(i) for i in self.__value)
 
 
-class Chainer(Broadcaster, typing.Generic[T_co]):
+class Chainer(Broadcaster, typing.Generic[T]):
     __slots__ = ()
 
-    def __getattr__(self, name: str, /) -> Callable[..., BroadcastList[T_co]]:
-        def broadcaster(*args, **kwargs) -> BroadcastList[T_co]:
+    def __getattr__(self, name: str, /) -> Callable[..., BroadcastList[T]]:
+        def broadcaster(*args, **kwargs) -> BroadcastList[T]:
             for i in self._Broadcaster__value:  # type: ignore
                 getattr(i, name)(*args, **kwargs)
             return self._Broadcaster__value  # type: ignore
