@@ -27,6 +27,7 @@ dynamic = ["version"]
 
 [tool.uv]
 dev-dependencies = [
+    "fastapi[standard]>=0.115.3",
     "ipykernel>=6.29.5",
     "pytest-cov>=5.0.0",
     "pytest>=8.3.3",
