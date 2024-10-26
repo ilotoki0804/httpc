@@ -1,3 +1,4 @@
+from pathlib import Path
 import pickle
 import pytest
 from httpc import ParseTool
@@ -179,9 +180,19 @@ def soup() -> ParseTool:
 
 @pytest.fixture
 def res() -> ParseTool:
+    TEST_DIR = Path(__file__).parent
     # response from https://www.python.org/
-    with open("./tests/resources/response.pickle", "rb") as f:
+    with open(TEST_DIR / "resources/response.pickle", "rb") as f:
         return pickle.load(f)
+
+
+def generate_res() -> None:
+    import httpc
+
+    TEST_DIR = Path(__file__).parent
+    res = httpc.get("https://www.python.org/")
+    with open(TEST_DIR / "resources/response.pickle", "wb") as f:
+        pickle.dump(res, f)
 
 
 def test_single(soup):
@@ -213,3 +224,7 @@ def test_res(res):
         res.single("div")
     with pytest.raises(ValueError, match=r"https://www.python.org/"):
         res.single("no-matching-result")
+
+
+if __name__ == "__main__":
+    generate_res()
