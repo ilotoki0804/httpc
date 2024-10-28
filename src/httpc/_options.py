@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ssl
 import sys
 import typing
 from dataclasses import asdict, dataclass, fields
@@ -141,4 +142,5 @@ common = ClientOptions(
     headers=HEADERS,
     follow_redirects=True,
     raise_for_status=True,
+    verify=ssl.create_default_context(),
 )
