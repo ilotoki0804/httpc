@@ -55,7 +55,7 @@ class ParseTool:
             else:
                 return default
         elif remain_ok or length == 1:
-            return css_result.pop()
+            return css_result[0]
         else:
             raise ValueError(f"Query {query!r} matched with {length} nodes{self._get_url_note()}.")
 
