@@ -3,7 +3,7 @@ from __future__ import annotations
 import typing
 from contextlib import asynccontextmanager, contextmanager
 
-from httpx import AsyncClient as HttpxAsyncClient
+from httpx import AsyncClient as HttpxAsyncClient, HTTPStatusError
 from httpx import Client as HttpxClient
 from httpx._client import USE_CLIENT_DEFAULT, EventHook, UseClientDefault
 from httpx._config import (
@@ -115,6 +115,7 @@ class Client(HttpxClient):
         raise_for_status: bool | None = None,
     ) -> Response:
         last_exc = None
+        raise_for_status = raise_for_status or raise_for_status is None and self.raise_for_status
         retry = retry or self.retry or 1
         for _ in range(retry):
             try:
@@ -134,23 +135,26 @@ class Client(HttpxClient):
                     extensions=extensions,
                 )
 
-                # Retry when status code is server error.
-                # Exceptions of HTTP 4XX does not trigger retry.
-                if raise_for_status and response.status_code >= 500:
+                if raise_for_status:
                     response.raise_for_status()
+
+            except HTTPStatusError as exc:
+                # Retry when status code is server error.
+                # Exceptions other then HTTP 5XX don't trigger retry.
+                if retry == 1 or response.status_code < 500:
+                    raise
+
+                logger.warning(f"Attempting fetch again (status code {response.status_code})...")
+                last_exc = exc
 
             except Exception as exc:
                 if retry == 1:
                     raise
-                logger.warning("Attempting fetch again...")
+                logger.warning(f"Attempting fetch again ({type(exc).__name__})...")
                 last_exc = exc
             else:
                 if last_exc:
                     logger.warning(f"Successfully retrieve {url!r}")
-
-                # If raise_for_status is False, raise_for_status won't be checked.
-                if raise_for_status or raise_for_status is None and self.raise_for_status:
-                    response.raise_for_status()
 
                 return Response(response)
 
@@ -180,6 +184,7 @@ class Client(HttpxClient):
         raise_for_status: bool | None = None,
     ) -> typing.Iterator[Response]:
         last_exc = None
+        raise_for_status = raise_for_status or raise_for_status is None and self.raise_for_status
         retry = retry or self.retry or 1
         for _ in range(retry):
             try:
@@ -201,23 +206,25 @@ class Client(HttpxClient):
             except Exception as exc:
                 if retry == 1:
                     raise
-                logger.warning("Attempting fetch again...")
+                logger.warning(f"Attempting fetch again ({type(exc).__name__})...")
                 last_exc = exc
             else:
-                if last_exc:
-                    logger.warning(f"Successfully retrieve {url!r}")
-
                 with streamer as stream:
-                    # If raise_for_status is False, raise_for_status won't be checked.
-                    if raise_for_status or raise_for_status is None and self.raise_for_status:
+                    if raise_for_status:
                         try:
                             stream.raise_for_status()
-                        except Exception as exc:
-                            # Exceptions of HTTP 4XX does not trigger retry.
-                            if stream.status_code >= 500:
-                                last_exc = exc
-                                continue
-                            raise
+                        except HTTPStatusError as exc:
+                            # Retry when status code is server error.
+                            # Exceptions other then HTTP 5XX don't trigger retry.
+                            if retry == 1 or stream.status_code < 500:
+                                raise
+
+                            logger.warning(f"Attempting fetch again (status code {stream.status_code})...")
+                            last_exc = exc
+                            continue
+
+                    if last_exc:
+                        logger.warning(f"Successfully retrieve {url!r}")
 
                     yield Response(stream)
                     return
@@ -237,35 +244,7 @@ class Client(HttpxClient):
     #     follow_redirects: bool | UseClientDefault = USE_CLIENT_DEFAULT,
     #     retry: int | None = None,
     #     raise_for_status: bool | None = None,
-    # ) -> CSSResponse:
-    #     last_exc = None
-    #     for _ in range(retry or self.retry or 1):
-    #         try:
-    #             response = super().send(
-    #                 request,
-    #                 stream=stream,
-    #                 auth=auth,
-    #                 follow_redirects=follow_redirects,
-    #             )
-    #         except Exception as exc:
-    #             if retry == 1:
-    #                 raise
-    #             logger.warning("Attempting fetch again...")
-    #             last_exc = exc
-    #         else:
-    #             if last_exc:
-    #                 logger.warning(f"Successfully retrieve {request!r}")
-
-    #             # Exceptions from raise_for_status does not trigger retry.
-    #             if raise_for_status or self.raise_for_status:
-    #                 response.raise_for_status()
-
-    #             return CSSResponse(response)
-
-    #     if last_exc is None:
-    #         raise ValueError(f"Retry value must be natural number, but it's {retry!r}")
-
-    #     raise last_exc
+    # ) -> CSSResponse: ...
 
     def get(
         self,
@@ -599,6 +578,7 @@ class AsyncClient(HttpxAsyncClient):
         raise_for_status: bool | None = None,
     ) -> Response:
         last_exc = None
+        raise_for_status = raise_for_status or raise_for_status is None and self.raise_for_status
         retry = retry or self.retry or 1
         for _ in range(retry):
             try:
@@ -617,18 +597,30 @@ class AsyncClient(HttpxAsyncClient):
                     timeout=timeout,
                     extensions=extensions,
                 )
+
+                if raise_for_status:
+                    response.raise_for_status()
+
+            except HTTPStatusError as exc:
+                # Retry when status code is server error.
+                # Exceptions other then HTTP 5XX don't trigger retry.
+                if retry == 1 or response.status_code < 500:
+                    raise
+
+                logger.warning(f"Attempting fetch again (status code {response.status_code})...")
+                last_exc = exc
+
             except Exception as exc:
                 if retry == 1:
                     raise
-                logger.warning("Attempting fetch again...")
+                logger.warning(f"Attempting fetch again ({type(exc).__name__})...")
                 last_exc = exc
+
             else:
                 if last_exc:
                     logger.warning(f"Successfully retrieve {url!r}")
 
                 # Exceptions from raise_for_status does not trigger retry.
-                if raise_for_status or self.raise_for_status:
-                    response.raise_for_status()
 
                 return Response(response)
 
@@ -658,6 +650,7 @@ class AsyncClient(HttpxAsyncClient):
         raise_for_status: bool | None = None,
     ) -> typing.AsyncIterator[Response]:
         last_exc = None
+        raise_for_status = raise_for_status or raise_for_status is None and self.raise_for_status
         retry = retry or self.retry or 1
         for _ in range(retry):
             try:
@@ -679,19 +672,31 @@ class AsyncClient(HttpxAsyncClient):
             except Exception as exc:
                 if retry == 1:
                     raise
-                logger.warning("Attempting fetch again...")
+                logger.warning(f"Attempting fetch again ({type(exc).__name__})...")
                 last_exc = exc
             else:
                 if last_exc:
                     logger.warning(f"Successfully retrieve {url!r}")
 
                 async with streamer as stream:
-                    # Exceptions from raise_for_status does not trigger retry.
-                    # If raise_for_status is False, raise_for_status won't be checked.
-                    if raise_for_status or raise_for_status is None and self.raise_for_status:
-                        stream.raise_for_status()
+                    if raise_for_status:
+                        try:
+                            stream.raise_for_status()
+                        except HTTPStatusError as exc:
+                            # Retry when status code is server error.
+                            # Exceptions other then HTTP 5XX don't trigger retry.
+                            if retry == 1 or stream.status_code < 500:
+                                raise
+
+                            logger.warning(f"Attempting fetch again (status code {stream.status_code})...")
+                            last_exc = exc
+                            continue
+
+                    if last_exc:
+                        logger.warning(f"Successfully retrieve {url!r}")
 
                     yield Response(stream)
+                    return
 
         if last_exc is None:
             raise ValueError(f"Retry value must be natural number, but it's {retry!r}")
@@ -708,34 +713,7 @@ class AsyncClient(HttpxAsyncClient):
     #     follow_redirects: bool | UseClientDefault = USE_CLIENT_DEFAULT,
     #     retry: int | None = None,
     #     raise_for_status: bool | None = None,
-    # ) -> CSSResponse:
-    #     last_exc = None
-    #     retry = retry or self.retry or 1
-    #     for _ in range(retry):
-    #         try:
-    #             response = await super().send(
-    #                 request,
-    #                 stream=stream,
-    #                 auth=auth,
-    #                 follow_redirects=follow_redirects,
-    #             )
-    #         except Exception as exc:
-    #             logger.warning("Attempting fetch again...")
-    #             last_exc = exc
-    #         else:
-    #             if last_exc:
-    #                 logger.warning(f"Successfully retrieve {request!r}")
-
-    #             # Exceptions from raise_for_status does not trigger retry.
-    #             if raise_for_status or self.raise_for_status:
-    #                 response.raise_for_status()
-
-    #             return CSSResponse(response)
-
-    #     if last_exc is None:
-    #         raise ValueError(f"Retry value must be natural number, but it's {retry!r}")
-
-    #     raise last_exc
+    # ) -> CSSResponse: ...
 
     async def get(
         self,

@@ -36,8 +36,8 @@ ValueError: Query 'div' matched with 47 nodes (error from 'https://www.python.or
 >>> httpc.common.get("https://python.org")  # ClientOptions and httpc.common
 <Response [200 OK]>
 >>> httpc.common.get("https://hypothetical-unstable-website.com/", retry=5)  # retry parameter
-Attempting fetch again...
-Attempting fetch again...
+Attempting fetch again (ConnectError)...
+Attempting fetch again (ConnectError)...
 Successfully retrieve 'https://hypothetical-unstable-website.com/'
 <Response [200 OK]>
 >>> httpc.get("https://httpbin.org/status/400")
@@ -45,6 +45,12 @@ Successfully retrieve 'https://hypothetical-unstable-website.com/'
 >>> httpc.get("https://httpbin.org/status/400", raise_for_status=True)  # raise_for_status as parameter
 httpx.HTTPStatusError: Client error '400 BAD REQUEST' for url 'https://httpbin.org/status/400'
 For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400
+>>> httpc.get("https://httpbin.org/status/500", raise_for_status=True, retry=3)
+Attempting fetch again (status code 500)...
+Attempting fetch again (status code 500)...
+Attempting fetch again (status code 500)...
+httpx.HTTPStatusError: Server error '500 INTERNAL SERVER ERROR' for url 'https://httpbin.org/status/500'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500
 ```
 
 ## Release Note
