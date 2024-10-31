@@ -410,12 +410,6 @@ class FullDunder:
         except BaseException as exc:
             raise exc.with_traceback(None) from None
 
-    def __sizeof__(self, *args, **kwargs):
-        try:
-            return self.__getattr("__sizeof__", *args, **kwargs)
-        except BaseException as exc:
-            raise exc.with_traceback(None) from None
-
     async def __aiter__(self, *args, **kwargs):
         try:
             return await self.__agetattr("__aiter__", *args, **kwargs)
