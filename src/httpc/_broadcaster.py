@@ -81,7 +81,7 @@ class Chainer(Broadcaster, typing.Generic[T]):
 
 if typing.TYPE_CHECKING:
     from collections.abc import Iterator
-    from selectolax.parser import Node, Selector, _Attributes
+    from selectolax.lexbor import LexborNode as Node, LexborSelector as Selector, LexborAttributes as Attributes
 
     DefaultT = typing.TypeVar("DefaultT")
 
@@ -99,7 +99,7 @@ if typing.TYPE_CHECKING:
             ...
 
         @property
-        def attrs(self) -> BroadcastList[_Attributes]:
+        def attrs(self) -> BroadcastList[Attributes]:
             """A dict-like object that is similar to the attributes property, but operates directly on the Node data."""
             ...
 

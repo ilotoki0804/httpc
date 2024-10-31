@@ -3,7 +3,7 @@ from __future__ import annotations
 import typing
 
 import httpx
-from selectolax.parser import HTMLParser, Node
+from selectolax.lexbor import LexborHTMLParser as HTMLParser, LexborNode as Node
 
 from ._broadcaster import BroadcastList
 
