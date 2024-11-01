@@ -143,7 +143,6 @@ class Client(HttpxClient):
                 # Exceptions other then HTTP 5XX don't trigger retry.
                 if retry == 1 or response.status_code < 500:
                     raise
-
                 logger.warning(f"Attempting fetch again (status code {response.status_code})...")
                 last_exc = exc
 
@@ -152,6 +151,7 @@ class Client(HttpxClient):
                     raise
                 logger.warning(f"Attempting fetch again ({type(exc).__name__})...")
                 last_exc = exc
+
             else:
                 if last_exc:
                     logger.warning(f"Successfully retrieve {url!r}")
@@ -218,7 +218,6 @@ class Client(HttpxClient):
                             # Exceptions other then HTTP 5XX don't trigger retry.
                             if retry == 1 or stream.status_code < 500:
                                 raise
-
                             logger.warning(f"Attempting fetch again (status code {stream.status_code})...")
                             last_exc = exc
                             continue
@@ -606,7 +605,6 @@ class AsyncClient(HttpxAsyncClient):
                 # Exceptions other then HTTP 5XX don't trigger retry.
                 if retry == 1 or response.status_code < 500:
                     raise
-
                 logger.warning(f"Attempting fetch again (status code {response.status_code})...")
                 last_exc = exc
 
@@ -687,7 +685,6 @@ class AsyncClient(HttpxAsyncClient):
                             # Exceptions other then HTTP 5XX don't trigger retry.
                             if retry == 1 or stream.status_code < 500:
                                 raise
-
                             logger.warning(f"Attempting fetch again (status code {stream.status_code})...")
                             last_exc = exc
                             continue
