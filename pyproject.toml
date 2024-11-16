@@ -51,6 +51,9 @@ exclude_also = [
     "@(typing\\.)?deprecated",
     "@overload",
 ]
+source = [
+    "src",
+]
 
 [tool.hatch.version]
 path = "src/httpc/_base.py"
