@@ -70,5 +70,11 @@ class ParseTool:
 
 
 class Response(httpx.Response, ParseTool):
-    def __init__(self, response: httpx.Response) -> None:
+    _response: httpx.Response
+
+    @classmethod
+    def from_httpx(cls, response: httpx.Response) -> Response:
+        self = cls.__new__(cls)
         self.__dict__ = response.__dict__
+        self._response = response
+        return self

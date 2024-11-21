@@ -156,7 +156,7 @@ class Client(HttpxClient):
                 if last_exc:
                     logger.warning(f"Successfully retrieve {url!r}")
 
-                return Response(response)
+                return Response.from_httpx(response)
 
         if last_exc is None:
             raise ValueError(f"Retry value must be natural number, but it's {retry!r}")
@@ -225,7 +225,7 @@ class Client(HttpxClient):
                     if last_exc:
                         logger.warning(f"Successfully retrieve {url!r}")
 
-                    yield Response(stream)
+                    yield Response.from_httpx(stream)
                     return
 
         if last_exc is None:
@@ -620,7 +620,7 @@ class AsyncClient(HttpxAsyncClient):
 
                 # Exceptions from raise_for_status does not trigger retry.
 
-                return Response(response)
+                return Response.from_httpx(response)
 
         if last_exc is None:
             raise ValueError(f"Retry value must be natural number, but it's {retry!r}")
@@ -692,7 +692,7 @@ class AsyncClient(HttpxAsyncClient):
                     if last_exc:
                         logger.warning(f"Successfully retrieve {url!r}")
 
-                    yield Response(stream)
+                    yield Response.from_httpx(stream)
                     return
 
         if last_exc is None:
