@@ -18,13 +18,13 @@ from ._base import logger
 
 if typing.TYPE_CHECKING:
     # from httpx._models import Request
+    import ssl as _ssl
     from httpx._transports.base import AsyncBaseTransport, BaseTransport
     from httpx._types import (
         AuthTypes,
         CertTypes,
         CookieTypes,
         HeaderTypes,
-        ProxiesTypes,
         ProxyTypes,
         QueryParamTypes,
         RequestContent,
@@ -32,9 +32,9 @@ if typing.TYPE_CHECKING:
         RequestExtensions,
         RequestFiles,
         TimeoutTypes,
-        VerifyTypes,
     )
     from httpx._urls import URL
+    VerifyTypes = _ssl.SSLContext | str | bool
 
 __all__ = ["AsyncClient", "Client"]
 
@@ -54,7 +54,6 @@ class Client(HttpxClient):
         http1: bool = True,
         http2: bool = False,
         proxy: ProxyTypes | None = None,
-        proxies: ProxiesTypes | None = None,
         mounts: None | (typing.Mapping[str, BaseTransport | None]) = None,
         timeout: TimeoutTypes = DEFAULT_TIMEOUT_CONFIG,
         follow_redirects: bool = False,
@@ -79,7 +78,6 @@ class Client(HttpxClient):
             http1=http1,
             http2=http2,
             proxy=proxy,
-            proxies=proxies,
             mounts=mounts,
             timeout=timeout,
             follow_redirects=follow_redirects,
@@ -88,7 +86,6 @@ class Client(HttpxClient):
             event_hooks=event_hooks,
             base_url=base_url,
             transport=transport,
-            app=app,
             trust_env=trust_env,
             default_encoding=default_encoding,
         )
@@ -516,7 +513,6 @@ class AsyncClient(HttpxAsyncClient):
         http1: bool = True,
         http2: bool = False,
         proxy: ProxyTypes | None = None,
-        proxies: ProxiesTypes | None = None,
         mounts: None | (typing.Mapping[str, AsyncBaseTransport | None]) = None,
         timeout: TimeoutTypes = DEFAULT_TIMEOUT_CONFIG,
         follow_redirects: bool = False,
@@ -541,7 +537,6 @@ class AsyncClient(HttpxAsyncClient):
             http1=http1,
             http2=http2,
             proxy=proxy,
-            proxies=proxies,
             mounts=mounts,
             timeout=timeout,
             follow_redirects=follow_redirects,
@@ -550,7 +545,6 @@ class AsyncClient(HttpxAsyncClient):
             event_hooks=event_hooks,
             base_url=base_url,
             transport=transport,
-            app=app,
             trust_env=trust_env,
             default_encoding=default_encoding,
         )

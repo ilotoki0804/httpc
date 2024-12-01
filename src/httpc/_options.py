@@ -6,6 +6,7 @@ import typing
 from dataclasses import asdict, dataclass, fields
 
 if typing.TYPE_CHECKING:
+    import ssl as _ssl
     from httpx._client import EventHook
     from httpx._config import Limits
     from httpx._transports.base import BaseTransport
@@ -14,13 +15,12 @@ if typing.TYPE_CHECKING:
         CertTypes,
         CookieTypes,
         HeaderTypes,
-        ProxiesTypes,
         ProxyTypes,
         QueryParamTypes,
         TimeoutTypes,
         URLTypes,
-        VerifyTypes,
     )
+    VerifyTypes = _ssl.SSLContext | str | bool
 
 from httpc._api import request
 from httpc._client import AsyncClient, Client
@@ -80,7 +80,6 @@ class ClientOptions:
     http1: bool | None = None
     http2: bool | None = None
     proxy: ProxyTypes | None = None
-    proxies: ProxiesTypes | None = None
     mounts: typing.Mapping[str, BaseTransport | None] | None = None
     timeout: TimeoutTypes = None
     follow_redirects: bool | None = None
