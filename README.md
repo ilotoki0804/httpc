@@ -55,6 +55,7 @@ For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/St
 
 ## Release Note
 
+* 0.6.0: Remove deprecated parameters, remove ClientOptions
 * 0.5.0: Use Lexbor as default backend, fix and improve retry and raise_for_status
 * 0.4.0: Fix incorrect type hint, rename CSSTool to ParseTool, CSSResponse to Response, bugfixes and small improvements
 * 0.3.0: Add `new` parameter, remove `select` method, rename `css` to `match` from CSSTool, remove cache_api.py (unused script), add url note, retry if server error on raise_for_status, bugfix
