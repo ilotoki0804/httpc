@@ -24,6 +24,9 @@ dependencies = [
 ]
 dynamic = ["version"]
 
+[project.scripts]
+httpc-clean = "httpc._base:_extract_headers_cli"
+
 [tool.uv]
 dev-dependencies = [
     "fastapi[standard]>=0.115.5",

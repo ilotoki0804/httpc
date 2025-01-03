@@ -30,6 +30,39 @@ def extract_headers(curl_command: str) -> dict[str, str]:
     return headers
 
 
+def _extract_headers_cli() -> None:
+    print("Enter the curl command below.")
+    data = ""
+    while input_ := input():
+        data += input_ + "\n"
+    headers = extract_headers(data)
+
+    cookie = headers.get("cookie", None)
+    if cookie:
+        headers["cookie"] = "<cookie>"
+
+    matched = re.match(r'''\A[\n ]*curl ['"](.+)['"] ?\\?''', data)
+    if matched:
+        url = matched.group(1)
+    else:
+        url = None
+
+    from rich.console import Console
+
+    console = Console()
+
+    if url:
+        console.rule("[b]URL[/b]")
+        print(url)
+
+    if cookie:
+        console.rule("[b]Cookie[/b]")
+        print(cookie)
+
+    console.rule("[b]Headers[/b]")
+    console.print(headers)
+
+
 class FullDunder:
     @abstractmethod
     def __getattr__(self, name: str, /):
