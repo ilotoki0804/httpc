@@ -3,6 +3,7 @@ from __future__ import annotations
 from abc import abstractmethod
 import logging
 import re
+import shlex
 
 __version__ = "0.6.0"
 
@@ -24,28 +25,54 @@ HEADERS = {
 }
 
 
-def extract_headers(curl_command: str) -> dict[str, str]:
-    raw_headers = re.findall(r"(?<=\n  -H ')([^:]+): (.*)(?=' \\\n|'\Z)", curl_command.strip())
-    headers = dict(raw_headers)
-    return headers
+def parse_curl(curl_command: str) -> tuple[str, dict[str, str]]:
+    command = shlex.split(curl_command)
+    command = [arg for arg in reversed(command) if arg not in ("\n", "--compressed")]
+
+    header_re = re.compile("(?P<name>[^:]+): (?P<value>.+)")
+    assert command.pop() == "curl"
+
+    # URL은 앞에도 마지막에도 있을 수 있음
+    if command[-1] == "-H":
+        url = command.pop(0)
+    else:
+        url = command.pop()
+
+    headers = {}
+    try:
+        while True:
+            assert command.pop() == "-H"
+            header = command.pop()
+            matched = header_re.match(header)
+            assert matched
+            name = matched["name"]
+            value = matched["value"]
+
+            if name not in headers:
+                headers[name] = value
+                continue
+
+            if name.lower() != "cookie":
+                raise ValueError(f"Duplicate header: {name}, new: {value!r}, old: {headers[name]!r}")
+
+            headers[name] += f"; {value}"
+    except IndexError:
+        pass
+
+    return url, headers
 
 
 def _extract_headers_cli() -> None:
+    # Devtools와 mitmproxy의 curl 복사에서 헤더 추출에 사용
     print("Enter the curl command below.")
     data = ""
     while input_ := input():
         data += input_ + "\n"
-    headers = extract_headers(data)
+    url, headers = parse_curl(data)
 
     cookie = headers.get("cookie", None)
     if cookie:
         headers["cookie"] = "<cookie>"
-
-    matched = re.match(r'''\A[\n ]*curl ['"](.+)['"] ?\\?''', data)
-    if matched:
-        url = matched.group(1)
-    else:
-        url = None
 
     from rich.console import Console
 

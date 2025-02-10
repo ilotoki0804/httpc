@@ -1,5 +1,5 @@
 from ._api import *
-from ._base import extract_headers, HEADERS
+from ._base import parse_curl, HEADERS
 from ._broadcaster import BroadcastList
 from ._client import AsyncClient, Client
 from ._parse import Response, ParseTool
@@ -14,7 +14,7 @@ __all__ = [
     "put",
     "request",
     "stream",
-    "extract_headers",
+    "parse_curl",
     "BroadcastList",
     "AsyncClient",
     "Client",
