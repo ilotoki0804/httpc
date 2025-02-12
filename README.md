@@ -55,7 +55,7 @@ For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/St
 
 ## Release Note
 
-* 0.7.0: Add httpc.catcher (from [httpx-catcher](https://github.com/ilotoki0804/httpx-catcher))
+* 0.7.0: Add httpc.catcher (from [httpx-catcher](https://github.com/ilotoki0804/httpx-catcher)), add httpc-clean CLI script for sanitizing headers
 * 0.6.0: Remove deprecated parameters, remove ClientOptions
 * 0.5.0: Use Lexbor as default backend, fix and improve retry and raise_for_status
 * 0.4.0: Fix incorrect type hint, rename CSSTool to ParseTool, CSSResponse to Response, bugfixes and small improvements
