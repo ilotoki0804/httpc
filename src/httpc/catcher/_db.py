@@ -63,7 +63,7 @@ class TransactionDatabase(MutableMapping[httpx.Request, httpx.Response]):
         try:
             self._cx = sqlite3.connect(uri, autocommit=True, uri=True)
         except sqlite3.Error as exc:
-            raise DBError(str(exc))
+            raise DBError(str(exc)) from None
 
         # This is an optimization only; it's ok if it fails.
         with suppress(sqlite3.OperationalError):
@@ -80,7 +80,7 @@ class TransactionDatabase(MutableMapping[httpx.Request, httpx.Response]):
         try:
             return closing(self._cx.execute(*args, **kwargs))
         except sqlite3.Error as exc:
-            raise DBError(str(exc))
+            raise DBError(str(exc)) from None
 
     def _build_queries(self, table: str) -> None:
         if not table.isidentifier():
@@ -169,7 +169,7 @@ class TransactionDatabase(MutableMapping[httpx.Request, httpx.Response]):
                 for row in cu:
                     yield self._assemble_request(row)
         except sqlite3.Error as exc:
-            raise DBError(str(exc))
+            raise DBError(str(exc)) from None
 
     def close(self) -> None:
         if self._cx:
@@ -180,7 +180,7 @@ class TransactionDatabase(MutableMapping[httpx.Request, httpx.Response]):
         try:
             self._execute(self._drop_table)
         except sqlite3.Error as exc:
-            raise DBError(str(exc))
+            raise DBError(str(exc)) from None
 
     def keys(self) -> list[httpx.Request]:
         return list(super().keys())

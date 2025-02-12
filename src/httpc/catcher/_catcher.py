@@ -57,19 +57,19 @@ class AsyncCatcherTransport(httpx.AsyncHTTPTransport):
             response = self.db[request]
         except KeyError:
             if not _comprehensive_error:
-                raise ValueError(request)
+                raise ValueError(request) from None
 
             method = "" if request.method == "GET" else request.method + " "
             content = request.content
             if not content:
                 raise ValueError(
-                    f"Could not find a {method}response for {request.url}")
+                    f"Could not find a {method}response for {request.url}") from None
             elif len(content) <= 20:
                 raise ValueError(
-                    f"Could not find a {method}response for {request.url} (with content: {content!r})")
+                    f"Could not find a {method}response for {request.url} (with content: {content!r})") from None
             else:
                 raise ValueError(
-                    f"Could not find a {method}response for {request.url} (with {len(content)} length content)")
+                    f"Could not find a {method}response for {request.url} (with {len(content)} length content)") from None
 
         response._request = request
         # response.stream = None
