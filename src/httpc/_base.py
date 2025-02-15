@@ -41,12 +41,21 @@ def parse_curl(curl_command: str) -> tuple[str, dict[str, str]]:
     headers = {}
     try:
         while True:
-            assert command.pop() == "-H"
-            header = command.pop()
-            matched = header_re.match(header)
-            assert matched
-            name = matched["name"]
-            value = matched["value"]
+            match command.pop():
+                case "-H":
+                    header = command.pop()
+                    matched = header_re.match(header)
+                    assert matched
+                    name = matched["name"]
+                    value = matched["value"]
+
+                case "-b":
+                    name = "cookie"
+                    value = command.pop()
+
+                case option:
+                    value = command.pop()
+                    raise ValueError(f"Unknown option {option!r} with value: {value!r}")
 
             if name not in headers:
                 headers[name] = value
