@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod
+import json
 import logging
 import re
 import shlex
@@ -96,7 +97,9 @@ def _extract_headers_cli() -> None:
         print(cookie)
 
     console.rule("[b]Headers[/b]")
-    console.print(headers)
+    # double quotes를 선호하기 위해 일부러 json.loads 사용
+    # 일반적으로는 그냥 console.print만 사용해도 OK
+    console.print(json.dumps(headers, indent=4, ensure_ascii=False))
 
 
 class FullDunder:
