@@ -26,7 +26,7 @@ HEADERS = {
 }
 
 
-def parse_curl(curl_command: str) -> tuple[str, dict[str, str]]:
+def _parse_curl(curl_command: str) -> tuple[str, dict[str, str], str | None]:
     command = shlex.split(curl_command)
     command = [arg for arg in reversed(command) if arg not in ("\n", "--compressed")]
 
@@ -40,6 +40,7 @@ def parse_curl(curl_command: str) -> tuple[str, dict[str, str]]:
         url = command.pop()
 
     headers = {}
+    data = None
     try:
         while True:
             match command.pop():
@@ -54,6 +55,10 @@ def parse_curl(curl_command: str) -> tuple[str, dict[str, str]]:
                     name = "cookie"
                     value = command.pop()
 
+                case "--data-raw":
+                    data = command.pop()
+                    continue
+
                 case option:
                     value = command.pop()
                     raise ValueError(f"Unknown option {option!r} with value: {value!r}")
@@ -63,13 +68,13 @@ def parse_curl(curl_command: str) -> tuple[str, dict[str, str]]:
                 continue
 
             if name.lower() != "cookie":
-                raise ValueError(f"Duplicate header: {name}, new: {value!r}, old: {headers[name]!r}")
+                headers[name] += f"; {value}"
 
-            headers[name] += f"; {value}"
+            raise ValueError(f"Duplicate header: {name}, new: {value!r}, old: {headers[name]!r}")
     except IndexError:
         pass
 
-    return url, headers
+    return url, headers, data
 
 
 def _extract_headers_cli() -> None:
@@ -78,7 +83,7 @@ def _extract_headers_cli() -> None:
     data = ""
     while input_ := input():
         data += input_ + "\n"
-    url, headers = parse_curl(data)
+    url, headers, data = _parse_curl(data)
 
     cookie = headers.get("cookie", None)
     if cookie:
@@ -95,6 +100,13 @@ def _extract_headers_cli() -> None:
     if cookie:
         console.rule("[b]Cookie[/b]")
         print(cookie)
+
+    if data:
+        if data.startswith("$"):
+            console.rule("[b]Payload[/b] (It may not be accurate!)")
+        else:
+            console.rule("[b]Payload[/b]")
+        print(repr(data))
 
     console.rule("[b]Headers[/b]")
     # double quotes를 선호하기 위해 일부러 json.loads 사용

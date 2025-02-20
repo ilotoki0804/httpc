@@ -1,4 +1,4 @@
-from httpc import parse_curl
+from httpc._base import _parse_curl
 
 
 def test_extract_headers():
@@ -15,10 +15,11 @@ curl 'https://peps.python.org/pep-0649/' \
   -H 'sec-fetch-site: none' \
   -H 'sec-fetch-user: ?1' \
   -H 'upgrade-insecure-requests: 1' \
-  -H 'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36'
+  -H 'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36' \
+  --data-raw '{"operationName":"getLgMvnoMmlyRmndUsagsWithLimit","variables":{"contnum":"510150463935","limit":1},"query":"query getLgMvnoMmlyRmndUsagsWithLimit($contnum: String\u0021, $limit: Float) {\\n  getLgMvnoMmlyRmndUsagsWithLimit(contnum: $contnum, limit: $limit) {\\n    isSuccess\\n    code\\n    message\\n    data\\n    __typename\\n  }\\n}\\n'
 """
 
-    url, headers = parse_curl(sample)
+    url, headers, data = _parse_curl(sample)
     assert url == "https://peps.python.org/pep-0649/"
     assert headers == {
         "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
@@ -34,3 +35,4 @@ curl 'https://peps.python.org/pep-0649/' \
         "upgrade-insecure-requests": "1",
         "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36",
     }
+    assert data == '{"operationName":"getLgMvnoMmlyRmndUsagsWithLimit","variables":{"contnum":"510150463935","limit":1},"query":"query getLgMvnoMmlyRmndUsagsWithLimit($contnum: String\\u0021, $limit: Float) {\\\\n  getLgMvnoMmlyRmndUsagsWithLimit(contnum: $contnum, limit: $limit) {\\\\n    isSuccess\\\\n    code\\\\n    message\\\\n    data\\\\n    __typename\\\\n  }\\\\n}\\\\n'
