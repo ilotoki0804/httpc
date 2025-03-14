@@ -1,6 +1,8 @@
-from pathlib import Path
 import pickle
+from pathlib import Path
+
 import pytest
+
 from httpc import ParseTool
 
 SAMPLE_HTML = R"""<!DOCTYPE html>

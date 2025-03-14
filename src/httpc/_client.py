@@ -3,8 +3,9 @@ from __future__ import annotations
 import typing
 from contextlib import asynccontextmanager, contextmanager
 
-from httpx import AsyncClient as HttpxAsyncClient, HTTPStatusError
+from httpx import AsyncClient as HttpxAsyncClient
 from httpx import Client as HttpxClient
+from httpx import HTTPStatusError
 from httpx._client import USE_CLIENT_DEFAULT, EventHook, UseClientDefault
 from httpx._config import (
     DEFAULT_LIMITS,
@@ -13,12 +14,13 @@ from httpx._config import (
     Limits,
 )
 
-from ._parse import Response
 from ._base import logger
+from ._parse import Response
 
 if typing.TYPE_CHECKING:
     # from httpx._models import Request
     import ssl as _ssl
+
     from httpx._transports.base import AsyncBaseTransport, BaseTransport
     from httpx._types import (
         AuthTypes,

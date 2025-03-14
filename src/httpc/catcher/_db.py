@@ -4,10 +4,10 @@ import json
 import os
 import pickle
 import sqlite3
-from pathlib import Path
-from contextlib import suppress, closing
-from collections.abc import MutableMapping
 import typing
+from collections.abc import MutableMapping
+from contextlib import closing, suppress
+from pathlib import Path
 
 import httpx
 

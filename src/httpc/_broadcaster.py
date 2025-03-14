@@ -81,7 +81,10 @@ class Chainer(Broadcaster, typing.Generic[T]):
 
 if typing.TYPE_CHECKING:
     from collections.abc import Iterator
-    from selectolax.lexbor import LexborNode as Node, LexborSelector as Selector, LexborAttributes as Attributes
+
+    from selectolax.lexbor import LexborAttributes as Attributes
+    from selectolax.lexbor import LexborNode as Node
+    from selectolax.lexbor import LexborSelector as Selector
 
     DefaultT = typing.TypeVar("DefaultT")
 

@@ -1,4 +1,4 @@
-from httpc._broadcaster import BroadcastList, Broadcaster
+from httpc._broadcaster import Broadcaster, BroadcastList
 
 
 def test_broadcast_list():

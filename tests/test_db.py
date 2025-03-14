@@ -1,9 +1,11 @@
 import asyncio
 from pathlib import Path
-import httpc
+
 import httpx
-from httpc.catcher import AsyncCatcherTransport, TransactionDatabase, DBError
 import pytest
+
+import httpc
+from httpc.catcher import AsyncCatcherTransport, DBError, TransactionDatabase
 
 RESOURCE_DIR = Path(__file__).parent.joinpath("resource")
 

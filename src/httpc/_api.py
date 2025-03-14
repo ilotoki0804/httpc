@@ -7,6 +7,7 @@ from httpx._config import DEFAULT_TIMEOUT_CONFIG
 
 if typing.TYPE_CHECKING:
     import ssl as _ssl
+
     from httpx._types import (
         AuthTypes,
         CertTypes,

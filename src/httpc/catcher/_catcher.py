@@ -98,6 +98,7 @@ def install(db_path: PathType, mode: ModeType):
         return
 
     import atexit
+
     import httpx
 
     transport_initializer = AsyncCatcherTransport.with_db(db_path, mode)
@@ -115,6 +116,7 @@ def install_httpc(db_path: PathType, mode: ModeType):
         return
 
     import atexit
+
     import httpc
 
     transport_initializer = AsyncCatcherTransport.with_db(db_path, mode)

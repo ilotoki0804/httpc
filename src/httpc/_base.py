@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from abc import abstractmethod
 import json
 import logging
 import re
 import shlex
+from abc import abstractmethod
 
 __version__ = "0.7.0"
 
