@@ -1,4 +1,4 @@
-from ._catcher import AsyncCatcherTransport, ModeType, install, install_httpc
+from ._catcher import AsyncCatcherTransport, ModeType, install_httpx, install_httpc
 from ._db import DBError, TransactionDatabase
 
 __version__ = "0.1.0"
@@ -7,6 +7,6 @@ __all__ = [
     "DBError",
     "ModeType",
     "TransactionDatabase",
-    "install",
+    "install_httpx",
     "install_httpc",
 ]

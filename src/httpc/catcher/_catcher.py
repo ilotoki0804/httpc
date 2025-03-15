@@ -8,13 +8,13 @@ import httpx
 
 from ._db import TransactionDatabase
 
-type VerifyType = ssl.SSLContext | str | bool
-type PathType = PathLike | str | bytes
-type ContentKey = tuple[str, str, bytes]
-type ModeType = Literal["store", "use", "hybrid", "passive"]
+VerifyType = ssl.SSLContext | str | bool
+PathType = PathLike | str | bytes
+ContentKey = tuple[str, str, bytes]
+ModeType = Literal["store", "use", "hybrid", "passive"]
 
 DEFAULT_LOGGER = logging.getLogger(__name__)
-_installed = False
+_installed_httpx = False
 _httpc_installed = False
 
 
@@ -92,9 +92,9 @@ class AsyncCatcherTransport(httpx.AsyncHTTPTransport):
         return response
 
 
-def install(db_path: PathType, mode: ModeType):
-    global _installed
-    if _installed:
+def install_httpx(db_path: PathType, mode: ModeType):
+    global _installed_httpx
+    if _installed_httpx:
         return
 
     import atexit
@@ -107,7 +107,7 @@ def install(db_path: PathType, mode: ModeType):
     # monkey patching transport
     httpx.AsyncClient.__init__.__kwdefaults__["transport"] = transport
 
-    _installed = True
+    _installed_httpx = True
 
 
 def install_httpc(db_path: PathType, mode: ModeType):
