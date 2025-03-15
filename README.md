@@ -55,6 +55,7 @@ For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/St
 
 ## Release Note
 
+* 0.8.0: httpc-clean 기능 data와 cookie 파라미터도 받도록 확장, 파이썬 3.10 이상으로 지원 범위 좁힘, catcher.install 함수를 catcher.install_httpx으로 이름 변경, retry 설정 시 httpx의 오류에만 retry하도록 변경
 * 0.7.0: Add httpc.catcher (from [httpx-catcher](https://github.com/ilotoki0804/httpx-catcher)), add httpc-clean CLI script for sanitizing headers
 * 0.6.0: Remove deprecated parameters, remove ClientOptions
 * 0.5.0: Use Lexbor as default backend, fix and improve retry and raise_for_status
