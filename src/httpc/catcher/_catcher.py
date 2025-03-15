@@ -18,6 +18,27 @@ _installed_httpx = False
 _httpc_installed = False
 
 
+class RequestNotFoundError(ValueError):
+    request: httpx.Request
+
+    @classmethod
+    def from_request(cls, request: httpx.Request):
+        method = "" if request.method == "GET" else request.method + " "
+        content = request.content
+        if not content:
+            self = cls(
+                f"There's no stored response for a {method}response for {request.url}")
+        elif len(content) <= 20:
+            self = cls(
+                f"There's no stored response for a {method}response for {request.url} (with content: {content!r})")
+        else:
+            self = cls(
+                f"There's no stored response for a {method}response for {request.url} (with {len(content)} length content)")
+
+        self.request = request
+        return self
+
+
 class AsyncCatcherTransport(httpx.AsyncHTTPTransport):
     logger = DEFAULT_LOGGER
     valid_modes = "store", "use", "hybrid", "passive"
@@ -59,24 +80,11 @@ class AsyncCatcherTransport(httpx.AsyncHTTPTransport):
         await response.aread()
         self.db[request] = response
 
-    def find_request(self, request: httpx.Request, *, _comprehensive_error: bool = True) -> httpx.Response:
+    def find_request(self, request: httpx.Request) -> httpx.Response:
         try:
             response = self.db[request]
         except KeyError:
-            if not _comprehensive_error:
-                raise ValueError(request) from None
-
-            method = "" if request.method == "GET" else request.method + " "
-            content = request.content
-            if not content:
-                raise ValueError(
-                    f"Could not find a {method}response for {request.url}") from None
-            elif len(content) <= 20:
-                raise ValueError(
-                    f"Could not find a {method}response for {request.url} (with content: {content!r})") from None
-            else:
-                raise ValueError(
-                    f"Could not find a {method}response for {request.url} (with {len(content)} length content)") from None
+            raise RequestNotFoundError.from_request(request) from None
 
         response._request = request
         # response.stream = None
@@ -88,7 +96,7 @@ class AsyncCatcherTransport(httpx.AsyncHTTPTransport):
             return self.find_request(request)
 
         if self.mode == "hybrid":
-            with suppress(ValueError):
+            with suppress(RequestNotFoundError):
                 await request.aread()
                 return self.find_request(request)
 
