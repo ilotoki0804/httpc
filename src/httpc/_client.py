@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager, contextmanager
 
 from httpx import AsyncClient as HttpxAsyncClient
 from httpx import Client as HttpxClient
-from httpx import HTTPStatusError
+from httpx import HTTPStatusError, RequestError, StreamError
 from httpx._client import USE_CLIENT_DEFAULT, EventHook, UseClientDefault
 from httpx._config import (
     DEFAULT_LIMITS,
@@ -18,7 +18,6 @@ from ._base import logger
 from ._parse import Response
 
 if typing.TYPE_CHECKING:
-    # from httpx._models import Request
     import ssl as _ssl
 
     from httpx._transports.base import AsyncBaseTransport, BaseTransport
@@ -145,7 +144,10 @@ class Client(HttpxClient):
                 logger.warning(f"Attempting fetch again (status code {response.status_code})...")
                 last_exc = exc
 
-            except Exception as exc:
+            # httpx의 exception에는 RequestError, StreamError, InvalidURL, CookieConflict 이렇게 4개가 있는데
+            # 이중에서 retry의 대상이 아는 InvalidURL, CookieConflict을 제외하고 두 오류를 맏닥뜨렸을 때
+            # retry를 시도한다.
+            except (RequestError, StreamError) as exc:
                 if retry == 1:
                     raise
                 logger.warning(f"Attempting fetch again ({type(exc).__name__})...")
@@ -202,7 +204,10 @@ class Client(HttpxClient):
                     timeout=timeout,
                     extensions=extensions,
                 )
-            except Exception as exc:
+            # httpx의 exception에는 RequestError, StreamError, InvalidURL, CookieConflict 이렇게 4개가 있는데
+            # 이중에서 retry의 대상이 아는 InvalidURL, CookieConflict을 제외하고 두 오류를 맏닥뜨렸을 때
+            # retry를 시도한다.
+            except (RequestError, StreamError) as exc:
                 if retry == 1:
                     raise
                 logger.warning(f"Attempting fetch again ({type(exc).__name__})...")
@@ -604,7 +609,10 @@ class AsyncClient(HttpxAsyncClient):
                 logger.warning(f"Attempting fetch again (status code {response.status_code})...")
                 last_exc = exc
 
-            except Exception as exc:
+            # httpx의 exception에는 RequestError, StreamError, InvalidURL, CookieConflict 이렇게 4개가 있는데
+            # 이중에서 retry의 대상이 아는 InvalidURL, CookieConflict을 제외하고 두 오류를 맏닥뜨렸을 때
+            # retry를 시도한다.
+            except (RequestError, StreamError) as exc:
                 if retry == 1:
                     raise
                 logger.warning(f"Attempting fetch again ({type(exc).__name__})...")
@@ -663,7 +671,10 @@ class AsyncClient(HttpxAsyncClient):
                     timeout=timeout,
                     extensions=extensions,
                 )
-            except Exception as exc:
+            # httpx의 exception에는 RequestError, StreamError, InvalidURL, CookieConflict 이렇게 4개가 있는데
+            # 이중에서 retry의 대상이 아는 InvalidURL, CookieConflict을 제외하고 두 오류를 맏닥뜨렸을 때
+            # retry를 시도한다.
+            except (RequestError, StreamError) as exc:
                 if retry == 1:
                     raise
                 logger.warning(f"Attempting fetch again ({type(exc).__name__})...")
