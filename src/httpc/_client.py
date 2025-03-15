@@ -505,7 +505,7 @@ class Client(HttpxClient):
 
 
 class AsyncClient(HttpxAsyncClient):
-    __slots__ = "retry"
+    __slots__ = "retry", "raise_for_status"
 
     def __init__(
         self,
