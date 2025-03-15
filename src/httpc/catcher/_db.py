@@ -33,8 +33,13 @@ class TransactionDatabase(MutableMapping[httpx.Request, httpx.Response]):
         flag: typing.Literal["r", "w", "c", "n"] = "c",
         mode: int = 0o666,
         protocol: int = pickle.DEFAULT_PROTOCOL,
+        distinguish_headers: bool = False,
     ) -> None:
         self._protocol = protocol
+        # 주의: distinguish_headers를 사용할 때는 한 테이블에 대해 항상 일관적일 것.
+        # 데이터를 저장할 때 distinguish_headers가 True이면,
+        # False일 때 동일한 데이터로 간주되는 두 요청이 다른 데이터로 중복 저장될 수 있다.
+        self.distinguish_headers = distinguish_headers
 
         if hasattr(self, "_cx"):
             raise DBError(_ERR_REINIT)
@@ -108,6 +113,14 @@ class TransactionDatabase(MutableMapping[httpx.Request, httpx.Response]):
             AND content = CAST(? AS BLOB)
         )
         """
+        self._lookup_key_with_headers = f"""
+        SELECT response FROM {table} WHERE (
+            method = CAST(? AS TEXT)
+            AND url = CAST(? AS TEXT)
+            AND json(headers) = json(CAST(? AS TEXT))
+            AND content = CAST(? AS BLOB)
+        )
+        """
         self._store_kv = f"""
         INSERT INTO {table} (method, url, headers, content, response) VALUES (
             CAST(? AS TEXT), CAST(? AS TEXT), CAST(? AS TEXT), CAST(? AS BLOB), CAST(? AS BLOB)
@@ -116,6 +129,12 @@ class TransactionDatabase(MutableMapping[httpx.Request, httpx.Response]):
         self._delete_key = f"""DELETE FROM {table} WHERE (
             method = CAST(? AS TEXT)
             AND url = CAST(? AS TEXT)
+            AND content = CAST(? AS BLOB)
+        )"""
+        self._delete_key_with_headers = f"""DELETE FROM {table} WHERE (
+            method = CAST(? AS TEXT)
+            AND url = CAST(? AS TEXT)
+            AND json(headers) = json(CAST(? AS TEXT))
             AND content = CAST(? AS BLOB)
         )"""
         self._iter_keys = f"SELECT (method, url, headers, content) FROM {table}"
@@ -147,8 +166,12 @@ class TransactionDatabase(MutableMapping[httpx.Request, httpx.Response]):
         return row[0]
 
     def __getitem__(self, request: httpx.Request) -> httpx.Response:
-        with self._execute(self._lookup_key, self._disassemble_request_without_headers(request)) as cu:
-            row = cu.fetchone()
+        if self.distinguish_headers:
+            with self._execute(self._lookup_key_with_headers, self._disassemble_request(request)) as cu:
+                row = cu.fetchone()
+        else:
+            with self._execute(self._lookup_key, self._disassemble_request_without_headers(request)) as cu:
+                row = cu.fetchone()
         if not row:
             raise KeyError(request)
         return pickle.loads(row[0])
@@ -159,9 +182,14 @@ class TransactionDatabase(MutableMapping[httpx.Request, httpx.Response]):
         self._execute(self._store_kv, (*self._disassemble_request(request), pickle.dumps(response, protocol=self._protocol)))
 
     def __delitem__(self, request: httpx.Request) -> None:
-        with self._execute(self._delete_key, self._disassemble_request_without_headers(request)) as cu:
-            if not cu.rowcount:
-                raise KeyError(request)
+        if self.distinguish_headers:
+            with self._execute(self._delete_key_with_headers, self._disassemble_request(request)) as cu:
+                if not cu.rowcount:
+                    raise KeyError(request)
+        else:
+            with self._execute(self._delete_key, self._disassemble_request_without_headers(request)) as cu:
+                if not cu.rowcount:
+                    raise KeyError(request)
 
     def __iter__(self) -> typing.Iterator[httpx.Request]:
         try:

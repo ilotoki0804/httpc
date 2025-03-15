@@ -40,8 +40,15 @@ class AsyncCatcherTransport(httpx.AsyncHTTPTransport):
 
     @classmethod
     @contextmanager
-    def with_db(cls, db_path: PathType, mode: ModeType, table_name: str = "transactions"):
-        with TransactionDatabase(db_path, table_name, flag="c") as db:
+    def with_db(
+        cls,
+        db_path: PathType,
+        mode: ModeType,
+        table_name: str = "transactions",
+        *,
+        distinguish_headers: bool = False,
+    ):
+        with TransactionDatabase(db_path, table_name, flag="c", distinguish_headers=distinguish_headers) as db:
             yield cls(db=db, mode=mode)
 
     async def store_async_requests(self, request: httpx.Request, response: httpx.Response) -> None:
