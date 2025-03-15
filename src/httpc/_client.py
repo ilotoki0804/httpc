@@ -159,10 +159,10 @@ class Client(HttpxClient):
 
                 return Response.from_httpx(response)
 
-        if last_exc is None:
-            raise ValueError(f"Retry value must be natural number, but it's {retry!r}")
-
-        raise last_exc
+        if last_exc is not None:
+            raise last_exc
+        else:
+            raise ValueError(f"Parameter `retry` must be natural number or None, but it's {retry!r}")
 
     @contextmanager
     def stream(
@@ -232,10 +232,10 @@ class Client(HttpxClient):
                     yield Response.from_httpx(stream)
                     return
 
-        if last_exc is None:
-            raise ValueError(f"Retry value must be natural number, but it's {retry!r}")
-
-        raise last_exc
+        if last_exc is not None:
+            raise last_exc
+        else:
+            raise ValueError(f"Parameter `retry` must be natural number or None, but it's {retry!r}")
 
     # request and stream use send method internally.
     # def send(
@@ -626,10 +626,10 @@ class AsyncClient(HttpxAsyncClient):
 
                 return Response.from_httpx(response)
 
-        if last_exc is None:
-            raise ValueError(f"Retry value must be natural number, but it's {retry!r}")
-
-        raise last_exc
+        if last_exc is not None:
+            raise last_exc
+        else:
+            raise ValueError(f"Parameter `retry` must be natural number or None, but it's {retry!r}")
 
     @asynccontextmanager
     async def stream(
@@ -702,10 +702,10 @@ class AsyncClient(HttpxAsyncClient):
                     yield Response.from_httpx(stream)
                     return
 
-        if last_exc is None:
-            raise ValueError(f"Retry value must be natural number, but it's {retry!r}")
-
-        raise last_exc
+        if last_exc is not None:
+            raise last_exc
+        else:
+            raise ValueError(f"Parameter `retry` must be natural number or None, but it's {retry!r}")
 
     # request and stream use send method internally.
     # async def send(
