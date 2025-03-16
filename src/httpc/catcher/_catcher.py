@@ -68,8 +68,17 @@ class AsyncCatcherTransport(httpx.AsyncHTTPTransport):
         table_name: str = "transactions",
         *,
         distinguish_headers: bool = False,
+        compress_response: bool = False,
+        migrate_old_database: bool = True,
     ):
-        with TransactionDatabase(db_path, table_name, flag="c", distinguish_headers=distinguish_headers) as db:
+        with TransactionDatabase(
+            db_path,
+            table_name,
+            flag="c",
+            distinguish_headers=distinguish_headers,
+            compress_response=compress_response,
+            migrate_old_database=migrate_old_database,
+        ) as db:
             yield cls(db=db, mode=mode)
 
     async def store_async_requests(self, request: httpx.Request, response: httpx.Response) -> None:
