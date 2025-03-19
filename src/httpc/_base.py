@@ -14,15 +14,21 @@ HEADERS = {
     'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
     'accept-language': 'ko-KR,ko;q=0.9',
     'priority': 'u=0, i',
-    'sec-ch-ua': '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
+    'sec-ch-ua': '"Chromium";v="134", "Not:A-Brand";v="24", "Google Chrome";v="134"',
+    'sec-ch-ua-arch': '"x86"',
+    'sec-ch-ua-bitness': '"64"',
+    'sec-ch-ua-full-version-list': '"Chromium";v="134.0.6998.89", "Not:A-Brand";v="24.0.0.0", "Google Chrome";v="134.0.6998.89"',
     'sec-ch-ua-mobile': '?0',
+    'sec-ch-ua-model': '""',
     'sec-ch-ua-platform': '"Windows"',
+    'sec-ch-ua-platform-version': '"19.0.0"',
+    'sec-ch-ua-wow64': '?0',
     'sec-fetch-dest': 'document',
     'sec-fetch-mode': 'navigate',
     'sec-fetch-site': 'none',
     'sec-fetch-user': '?1',
     'upgrade-insecure-requests': '1',
-    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
+    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36',
 }
 
 
@@ -111,7 +117,8 @@ def _extract_headers_cli() -> None:
     console.rule("[b]Headers[/b]")
     # double quotes를 선호하기 위해 일부러 json.loads 사용
     # 일반적으로는 그냥 console.print만 사용해도 OK
-    console.print(json.dumps(headers, indent=4, ensure_ascii=False))
+    # console.print(json.dumps(headers, indent=4, ensure_ascii=False))
+    console.print(headers)
 
 
 class FullDunder:
