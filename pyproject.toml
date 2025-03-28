@@ -45,7 +45,7 @@ line-length = 120
 
 [tool.ruff.lint]
 select = ["E", "F", "UP", "W", "B"]
-ignore = ["E501", "F401", "E999", "F405", "F403", "E402", "S101", "F841"]
+ignore = ["E501", "F401", "F405", "F403", "E402", "S101", "F841"]
 
 [tool.coverage.report]
 exclude_also = [
