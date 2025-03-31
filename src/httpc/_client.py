@@ -92,6 +92,8 @@ class Client(HttpxClient):
         self.retry = retry
         self.raise_for_status = raise_for_status
 
+    # MARK: REQUEST
+
     def request(
         self,
         method: str,
@@ -112,7 +114,7 @@ class Client(HttpxClient):
         raise_for_status: bool | None = None,
     ) -> Response:
         last_exc = None
-        raise_for_status = raise_for_status or raise_for_status is None and self.raise_for_status
+        raise_for_status = self.raise_for_status if raise_for_status is None else raise_for_status
         retry = retry or self.retry or 1
         for _ in range(retry):
             try:
@@ -163,6 +165,8 @@ class Client(HttpxClient):
         else:
             raise ValueError(f"Parameter `retry` must be natural number or None, but it's {retry!r}")
 
+    # MARK: STREAM
+
     @contextmanager
     def stream(
         self,
@@ -184,7 +188,7 @@ class Client(HttpxClient):
         raise_for_status: bool | None = None,
     ) -> typing.Iterator[Response]:
         last_exc = None
-        raise_for_status = raise_for_status or raise_for_status is None and self.raise_for_status
+        raise_for_status = self.raise_for_status if raise_for_status is None else raise_for_status
         retry = retry or self.retry or 1
         for _ in range(retry):
             try:
@@ -556,6 +560,8 @@ class AsyncClient(HttpxAsyncClient):
         self.retry = retry
         self.raise_for_status = raise_for_status
 
+    # MARK: REQUEST
+
     async def request(
         self,
         method: str,
@@ -576,7 +582,7 @@ class AsyncClient(HttpxAsyncClient):
         raise_for_status: bool | None = None,
     ) -> Response:
         last_exc = None
-        raise_for_status = raise_for_status or raise_for_status is None and self.raise_for_status
+        raise_for_status = self.raise_for_status if raise_for_status is None else raise_for_status
         retry = retry or self.retry or 1
         for _ in range(retry):
             try:
@@ -629,6 +635,8 @@ class AsyncClient(HttpxAsyncClient):
         else:
             raise ValueError(f"Parameter `retry` must be natural number or None, but it's {retry!r}")
 
+    # MARK: STREAM
+
     @asynccontextmanager
     async def stream(
         self,
@@ -650,7 +658,7 @@ class AsyncClient(HttpxAsyncClient):
         raise_for_status: bool | None = None,
     ) -> typing.AsyncIterator[Response]:
         last_exc = None
-        raise_for_status = raise_for_status or raise_for_status is None and self.raise_for_status
+        raise_for_status = self.raise_for_status if raise_for_status is None else raise_for_status
         retry = retry or self.retry or 1
         for _ in range(retry):
             try:
