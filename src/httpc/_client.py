@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import sys
 import typing
 from contextlib import asynccontextmanager, contextmanager
+import warnings
 
-from httpx import AsyncClient as HttpxAsyncClient
+from httpx import AsyncClient as HttpxAsyncClient, Request
 from httpx import Client as HttpxClient
 from httpx import HTTPStatusError, RequestError, StreamError
 from httpx._client import USE_CLIENT_DEFAULT, EventHook, UseClientDefault
@@ -92,8 +94,6 @@ class Client(HttpxClient):
         self.retry = retry
         self.raise_for_status = raise_for_status
 
-    # MARK: REQUEST
-
     def request(
         self,
         method: str,
@@ -113,59 +113,34 @@ class Client(HttpxClient):
         retry: int | None = None,
         raise_for_status: bool | None = None,
     ) -> Response:
-        last_exc = None
-        raise_for_status = self.raise_for_status if raise_for_status is None else raise_for_status
-        retry = retry or self.retry or 1
-        for _ in range(retry):
-            try:
-                response = super().request(
-                    method,
-                    url,
-                    content=content,
-                    data=data,
-                    files=files,
-                    json=json,
-                    params=params,
-                    headers=headers,
-                    cookies=cookies,
-                    auth=auth,
-                    follow_redirects=follow_redirects,
-                    timeout=timeout,
-                    extensions=extensions,
-                )
+        if cookies is not None:
+            message = (
+                "Setting per-request cookies=<...> is being deprecated, because "
+                "the expected behaviour on cookie persistence is ambiguous. Set "
+                "cookies directly on the client instance instead."
+            )
+            warnings.warn(message, DeprecationWarning, stacklevel=2)
 
-                if raise_for_status:
-                    response.raise_for_status()
-
-            except HTTPStatusError as exc:
-                # Retry when status code is server error.
-                # Exceptions other then HTTP 5XX don't trigger retry.
-                if retry == 1 or response.status_code < 500:
-                    raise
-                logger.warning(f"Attempting fetch again (status code {response.status_code})...")
-                last_exc = exc
-
-            # httpx의 exception에는 RequestError, StreamError, InvalidURL, CookieConflict 이렇게 4개가 있는데
-            # 이중에서 retry의 대상이 아는 InvalidURL, CookieConflict을 제외하고 두 오류를 맏닥뜨렸을 때
-            # retry를 시도한다.
-            except (RequestError, StreamError) as exc:
-                if retry == 1:
-                    raise
-                logger.warning(f"Attempting fetch again ({type(exc).__name__})...")
-                last_exc = exc
-
-            else:
-                if last_exc:
-                    logger.warning(f"Successfully retrieve {url!r}")
-
-                return Response.from_httpx(response)
-
-        if last_exc is not None:
-            raise last_exc
-        else:
-            raise ValueError(f"Parameter `retry` must be natural number or None, but it's {retry!r}")
-
-    # MARK: STREAM
+        request = self.build_request(
+            method=method,
+            url=url,
+            content=content,
+            data=data,
+            files=files,
+            json=json,
+            params=params,
+            headers=headers,
+            cookies=cookies,
+            timeout=timeout,
+            extensions=extensions,
+        )
+        return self.send(
+            request,
+            auth=auth,
+            follow_redirects=follow_redirects,
+            retry=retry,
+            raise_for_status=raise_for_status,
+        )
 
     @contextmanager
     def stream(
@@ -187,70 +162,87 @@ class Client(HttpxClient):
         retry: int | None = None,
         raise_for_status: bool | None = None,
     ) -> typing.Iterator[Response]:
-        last_exc = None
+        request = self.build_request(
+            method=method,
+            url=url,
+            content=content,
+            data=data,
+            files=files,
+            json=json,
+            params=params,
+            headers=headers,
+            cookies=cookies,
+            timeout=timeout,
+            extensions=extensions,
+        )
+        response = self.send(
+            request=request,
+            auth=auth,
+            follow_redirects=follow_redirects,
+            stream=True,
+            retry=retry,
+            raise_for_status=raise_for_status,
+        )
+        try:
+            yield response
+        finally:
+            response.close()
+
+    # MARK: SEND
+
+    def send(
+        self,
+        request: Request,
+        *,
+        stream: bool = False,
+        auth: AuthTypes | UseClientDefault | None = USE_CLIENT_DEFAULT,
+        follow_redirects: bool | UseClientDefault = USE_CLIENT_DEFAULT,
+        retry: int | None = None,
+        raise_for_status: bool | None = None,
+    ) -> Response:
+        exceptions = []
         raise_for_status = self.raise_for_status if raise_for_status is None else raise_for_status
         retry = retry or self.retry or 1
+
+        # 대신 <=을 사용하면 retry에 이상한 값이 들어가도 문제없이 동작함
+        if retry == 1:
+            response = super().send(request, stream=stream, auth=auth, follow_redirects=follow_redirects)
+            if raise_for_status:
+                response.raise_for_status()
+            return Response.from_httpx(response)
+
         for _ in range(retry):
             try:
-                streamer = super().stream(
-                    method,
-                    url,
-                    content=content,
-                    data=data,
-                    files=files,
-                    json=json,
-                    params=params,
-                    headers=headers,
-                    cookies=cookies,
-                    auth=auth,
-                    follow_redirects=follow_redirects,
-                    timeout=timeout,
-                    extensions=extensions,
-                )
-            # httpx의 exception에는 RequestError, StreamError, InvalidURL, CookieConflict 이렇게 4개가 있는데
-            # 이중에서 retry의 대상이 아는 InvalidURL, CookieConflict을 제외하고 두 오류를 맏닥뜨렸을 때
-            # retry를 시도한다.
-            except (RequestError, StreamError) as exc:
-                if retry == 1:
+                response = super().send(request, stream=stream, auth=auth, follow_redirects=follow_redirects)
+                if raise_for_status:
+                    response.raise_for_status()
+            except HTTPStatusError as exc:
+                if 500 <= response.status_code < 600:
+                    logger.warning(f"Attempting fetch again (status code {response.status_code})...")
+                    exceptions.append(exc)
+                else:
                     raise
+            # httpx의 다섯 Exception 중 미리 처리하는 HTTPStatusError와 retry의 대상이 아닌 InvalidURL, CookieConflict을 제외한 예외들
+            except (RequestError, StreamError) as exc:
                 logger.warning(f"Attempting fetch again ({type(exc).__name__})...")
-                last_exc = exc
+                exceptions.append(exc)
             else:
-                with streamer as stream:
-                    if raise_for_status:
-                        try:
-                            stream.raise_for_status()
-                        except HTTPStatusError as exc:
-                            # Retry when status code is server error.
-                            # Exceptions other then HTTP 5XX don't trigger retry.
-                            if retry == 1 or stream.status_code < 500:
-                                raise
-                            logger.warning(f"Attempting fetch again (status code {stream.status_code})...")
-                            last_exc = exc
-                            continue
+                if exceptions:
+                    logger.warning(f"Successfully retrieve {request.url!r}")
+                return Response.from_httpx(response)
 
-                    if last_exc:
-                        logger.warning(f"Successfully retrieve {url!r}")
-
-                    yield Response.from_httpx(stream)
-                    return
-
-        if last_exc is not None:
-            raise last_exc
+        if exceptions:
+            if sys.version_info >= (3, 11):
+                raise ExceptionGroup(  # noqa
+                    "Request failed after multiple attempts",
+                    exceptions,
+                )
+            else:
+                raise exceptions.pop()
         else:
-            raise ValueError(f"Parameter `retry` must be natural number or None, but it's {retry!r}")
-
-    # request and stream use send method internally.
-    # def send(
-    #     self,
-    #     request: Request,
-    #     *,
-    #     stream: bool = False,
-    #     auth: AuthTypes | UseClientDefault | None = USE_CLIENT_DEFAULT,
-    #     follow_redirects: bool | UseClientDefault = USE_CLIENT_DEFAULT,
-    #     retry: int | None = None,
-    #     raise_for_status: bool | None = None,
-    # ) -> CSSResponse: ...
+            raise ValueError(
+                f"Parameter `retry` must be natural number or None, but it's {retry!r}"
+            )
 
     def get(
         self,
@@ -560,8 +552,6 @@ class AsyncClient(HttpxAsyncClient):
         self.retry = retry
         self.raise_for_status = raise_for_status
 
-    # MARK: REQUEST
-
     async def request(
         self,
         method: str,
@@ -581,61 +571,34 @@ class AsyncClient(HttpxAsyncClient):
         retry: int | None = None,
         raise_for_status: bool | None = None,
     ) -> Response:
-        last_exc = None
-        raise_for_status = self.raise_for_status if raise_for_status is None else raise_for_status
-        retry = retry or self.retry or 1
-        for _ in range(retry):
-            try:
-                response = await super().request(
-                    method,
-                    url,
-                    content=content,
-                    data=data,
-                    files=files,
-                    json=json,
-                    params=params,
-                    headers=headers,
-                    cookies=cookies,
-                    auth=auth,
-                    follow_redirects=follow_redirects,
-                    timeout=timeout,
-                    extensions=extensions,
-                )
+        if cookies is not None:  # pragma: no cover
+            message = (
+                "Setting per-request cookies=<...> is being deprecated, because "
+                "the expected behaviour on cookie persistence is ambiguous. Set "
+                "cookies directly on the client instance instead."
+            )
+            warnings.warn(message, DeprecationWarning, stacklevel=2)
 
-                if raise_for_status:
-                    response.raise_for_status()
-
-            except HTTPStatusError as exc:
-                # Retry when status code is server error.
-                # Exceptions other then HTTP 5XX don't trigger retry.
-                if retry == 1 or response.status_code < 500:
-                    raise
-                logger.warning(f"Attempting fetch again (status code {response.status_code})...")
-                last_exc = exc
-
-            # httpx의 exception에는 RequestError, StreamError, InvalidURL, CookieConflict 이렇게 4개가 있는데
-            # 이중에서 retry의 대상이 아는 InvalidURL, CookieConflict을 제외하고 두 오류를 맏닥뜨렸을 때
-            # retry를 시도한다.
-            except (RequestError, StreamError) as exc:
-                if retry == 1:
-                    raise
-                logger.warning(f"Attempting fetch again ({type(exc).__name__})...")
-                last_exc = exc
-
-            else:
-                if last_exc:
-                    logger.warning(f"Successfully retrieve {url!r}")
-
-                # Exceptions from raise_for_status does not trigger retry.
-
-                return Response.from_httpx(response)
-
-        if last_exc is not None:
-            raise last_exc
-        else:
-            raise ValueError(f"Parameter `retry` must be natural number or None, but it's {retry!r}")
-
-    # MARK: STREAM
+        request = self.build_request(
+            method=method,
+            url=url,
+            content=content,
+            data=data,
+            files=files,
+            json=json,
+            params=params,
+            headers=headers,
+            cookies=cookies,
+            timeout=timeout,
+            extensions=extensions,
+        )
+        return await self.send(
+            request,
+            auth=auth,
+            follow_redirects=follow_redirects,
+            retry=retry,
+            raise_for_status=raise_for_status,
+        )
 
     @asynccontextmanager
     async def stream(
@@ -657,73 +620,87 @@ class AsyncClient(HttpxAsyncClient):
         retry: int | None = None,
         raise_for_status: bool | None = None,
     ) -> typing.AsyncIterator[Response]:
-        last_exc = None
+        request = self.build_request(
+            method=method,
+            url=url,
+            content=content,
+            data=data,
+            files=files,
+            json=json,
+            params=params,
+            headers=headers,
+            cookies=cookies,
+            timeout=timeout,
+            extensions=extensions,
+        )
+        response = await self.send(
+            request=request,
+            auth=auth,
+            follow_redirects=follow_redirects,
+            stream=True,
+            retry=retry,
+            raise_for_status=raise_for_status,
+        )
+        try:
+            yield response
+        finally:
+            await response.aclose()
+
+    # MARK: ASYNC SEND
+
+    async def send(
+        self,
+        request: Request,
+        *,
+        stream: bool = False,
+        auth: AuthTypes | UseClientDefault | None = USE_CLIENT_DEFAULT,
+        follow_redirects: bool | UseClientDefault = USE_CLIENT_DEFAULT,
+        retry: int | None = None,
+        raise_for_status: bool | None = None,
+    ) -> Response:
+        exceptions = []
         raise_for_status = self.raise_for_status if raise_for_status is None else raise_for_status
         retry = retry or self.retry or 1
+
+        # 대신 <=을 사용하면 retry에 이상한 값이 들어가도 문제없이 동작함
+        if retry == 1:
+            response = await super().send(request, stream=stream, auth=auth, follow_redirects=follow_redirects)
+            if raise_for_status:
+                response.raise_for_status()
+            return Response.from_httpx(response)
+
         for _ in range(retry):
             try:
-                streamer = super().stream(
-                    method,
-                    url,
-                    content=content,
-                    data=data,
-                    files=files,
-                    json=json,
-                    params=params,
-                    headers=headers,
-                    cookies=cookies,
-                    auth=auth,
-                    follow_redirects=follow_redirects,
-                    timeout=timeout,
-                    extensions=extensions,
-                )
-            # httpx의 exception에는 RequestError, StreamError, InvalidURL, CookieConflict 이렇게 4개가 있는데
-            # 이중에서 retry의 대상이 아는 InvalidURL, CookieConflict을 제외하고 두 오류를 맏닥뜨렸을 때
-            # retry를 시도한다.
-            except (RequestError, StreamError) as exc:
-                if retry == 1:
+                response = await super().send(request, stream=stream, auth=auth, follow_redirects=follow_redirects)
+                if raise_for_status:
+                    response.raise_for_status()
+            except HTTPStatusError as exc:
+                if 500 <= response.status_code < 600:
+                    logger.warning(f"Attempting fetch again (status code {response.status_code})...")
+                    exceptions.append(exc)
+                else:
                     raise
+            # httpx의 다섯 Exception 중 미리 처리하는 HTTPStatusError와 retry의 대상이 아닌 InvalidURL, CookieConflict을 제외한 예외들
+            except (RequestError, StreamError) as exc:
                 logger.warning(f"Attempting fetch again ({type(exc).__name__})...")
-                last_exc = exc
+                exceptions.append(exc)
             else:
-                if last_exc:
-                    logger.warning(f"Successfully retrieve {url!r}")
+                if exceptions:
+                    logger.warning(f"Successfully retrieve {request.url!r}")
+                return Response.from_httpx(response)
 
-                async with streamer as stream:
-                    if raise_for_status:
-                        try:
-                            stream.raise_for_status()
-                        except HTTPStatusError as exc:
-                            # Retry when status code is server error.
-                            # Exceptions other then HTTP 5XX don't trigger retry.
-                            if retry == 1 or stream.status_code < 500:
-                                raise
-                            logger.warning(f"Attempting fetch again (status code {stream.status_code})...")
-                            last_exc = exc
-                            continue
-
-                    if last_exc:
-                        logger.warning(f"Successfully retrieve {url!r}")
-
-                    yield Response.from_httpx(stream)
-                    return
-
-        if last_exc is not None:
-            raise last_exc
+        if exceptions:
+            if sys.version_info >= (3, 11):
+                raise ExceptionGroup(  # noqa
+                    "Request failed after multiple attempts",
+                    exceptions,
+                )
+            else:
+                raise exceptions.pop()
         else:
-            raise ValueError(f"Parameter `retry` must be natural number or None, but it's {retry!r}")
-
-    # request and stream use send method internally.
-    # async def send(
-    #     self,
-    #     request: Request,
-    #     *,
-    #     stream: bool = False,
-    #     auth: AuthTypes | UseClientDefault | None = USE_CLIENT_DEFAULT,
-    #     follow_redirects: bool | UseClientDefault = USE_CLIENT_DEFAULT,
-    #     retry: int | None = None,
-    #     raise_for_status: bool | None = None,
-    # ) -> CSSResponse: ...
+            raise ValueError(
+                f"Parameter `retry` must be natural number or None, but it's {retry!r}"
+            )
 
     async def get(
         self,
