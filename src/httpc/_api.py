@@ -21,6 +21,7 @@ if typing.TYPE_CHECKING:
         TimeoutTypes,
     )
     from httpx._urls import URL
+
     VerifyTypes = _ssl.SSLContext | str | bool
 
 from ._client import Client

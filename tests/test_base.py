@@ -35,4 +35,5 @@ curl 'https://peps.python.org/pep-0649/' \
         "upgrade-insecure-requests": "1",
         "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36",
     }
-    assert data == '{"operationName":"getLgMvnoMmlyRmndUsagsWithLimit","variables":{"contnum":"510150463935","limit":1},"query":"query getLgMvnoMmlyRmndUsagsWithLimit($contnum: String\\u0021, $limit: Float) {\\\\n  getLgMvnoMmlyRmndUsagsWithLimit(contnum: $contnum, limit: $limit) {\\\\n    isSuccess\\\\n    code\\\\n    message\\\\n    data\\\\n    __typename\\\\n  }\\\\n}\\\\n'
+    expected = '{"operationName":"getLgMvnoMmlyRmndUsagsWithLimit","variables":{"contnum":"510150463935","limit":1},"query":"query getLgMvnoMmlyRmndUsagsWithLimit($contnum: String\\u0021, $limit: Float) {\\\\n  getLgMvnoMmlyRmndUsagsWithLimit(contnum: $contnum, limit: $limit) {\\\\n    isSuccess\\\\n    code\\\\n    message\\\\n    data\\\\n    __typename\\\\n  }\\\\n}\\\\n'
+    assert data == expected

@@ -26,14 +26,11 @@ class RequestNotFoundError(ValueError):
         method = "" if request.method == "GET" else request.method + " "
         content = request.content
         if not content:
-            self = cls(
-                f"There's no stored response for a {method}response for {request.url}")
+            self = cls(f"There's no stored response for a {method}response for {request.url}")
         elif len(content) <= 20:
-            self = cls(
-                f"There's no stored response for a {method}response for {request.url} (with content: {content!r})")
+            self = cls(f"There's no stored response for a {method}response for {request.url} (with content: {content!r})")
         else:
-            self = cls(
-                f"There's no stored response for a {method}response for {request.url} (with {len(content)} length content)")
+            self = cls(f"There's no stored response for a {method}response for {request.url} (with {len(content)} length content)")
 
         self.request = request
         return self

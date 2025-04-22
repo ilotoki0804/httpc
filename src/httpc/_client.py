@@ -37,6 +37,7 @@ if typing.TYPE_CHECKING:
         TimeoutTypes,
     )
     from httpx._urls import URL
+
     VerifyTypes = _ssl.SSLContext | str | bool
 
 __all__ = ["AsyncClient", "Client"]
@@ -240,9 +241,7 @@ class Client(HttpxClient):
             else:
                 raise exceptions.pop()
         else:
-            raise ValueError(
-                f"Parameter `retry` must be natural number or None, but it's {retry!r}"
-            )
+            raise ValueError(f"Parameter `retry` must be natural number or None, but it's {retry!r}")
 
     def get(
         self,
@@ -698,9 +697,7 @@ class AsyncClient(HttpxAsyncClient):
             else:
                 raise exceptions.pop()
         else:
-            raise ValueError(
-                f"Parameter `retry` must be natural number or None, but it's {retry!r}"
-            )
+            raise ValueError(f"Parameter `retry` must be natural number or None, but it's {retry!r}")
 
     async def get(
         self,

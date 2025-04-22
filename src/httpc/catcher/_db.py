@@ -71,6 +71,7 @@ class TransactionDatabase(MutableMapping[httpx.Request, httpx.Response]):
 
         if self.compress_response:
             import zstd
+
             self.zstd = zstd
         else:
             try:
@@ -97,8 +98,7 @@ class TransactionDatabase(MutableMapping[httpx.Request, httpx.Response]):
                 path.unlink(missing_ok=True)
                 path.touch(mode=mode)
             case _:
-                raise ValueError("Flag must be one of 'r', 'w', 'c', or 'n', "
-                                 f"not {flag!r}")
+                raise ValueError(f"Flag must be one of 'r', 'w', 'c', or 'n', not {flag!r}")
 
         # We use the URI format when opening the database.
         uri = self._normalize_uri(path)
@@ -134,10 +134,7 @@ class TransactionDatabase(MutableMapping[httpx.Request, httpx.Response]):
         if not table.isidentifier():
             raise ValueError(f"Table name must be an identifier, not {table!r}")
         if table.startswith("sqlite_"):
-            raise ValueError(
-                "Table name should not start with 'sqlite_', "
-                "since it's reserved for internal use in sqlite"
-            )
+            raise ValueError("Table name should not start with 'sqlite_', since it's reserved for internal use in sqlite")
 
         self._build_table = f"""
         CREATE TABLE IF NOT EXISTS {table} (

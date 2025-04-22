@@ -29,9 +29,7 @@ def test_broadcast_list():
     my = BroadcastList([Attr(4), Attr("hello"), Attr(4.5), Attr([3])])
     assert my.bc.attr == [4, "hello", 4.5, [3]]
 
-    assert my.bc.returns_broadcast_list == BroadcastList(
-        [BroadcastList([4]), BroadcastList(["hello"]), BroadcastList([4.5]), BroadcastList([[3]])]
-    )
+    assert my.bc.returns_broadcast_list == BroadcastList([BroadcastList([4]), BroadcastList(["hello"]), BroadcastList([4.5]), BroadcastList([[3]])])
 
     assert my.bc.attr.bc.str() == BroadcastList(["4", "hello", "4.5", "[3]"])
     assert my.bc.attr.bc.repr() == BroadcastList(["4", "'hello'", "4.5", "[3]"])
