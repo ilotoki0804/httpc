@@ -14,7 +14,7 @@ ContentKey = tuple[str, str, bytes]
 ModeType = Literal["store", "use", "hybrid", "passive"]
 
 DEFAULT_LOGGER = logging.getLogger(__name__)
-_installed_httpx = False
+_httpx_installed = False
 _httpc_installed = False
 
 
@@ -114,8 +114,8 @@ class AsyncCatcherTransport(httpx.AsyncHTTPTransport):
 
 
 def install_httpx(db_path: PathType, mode: ModeType):
-    global _installed_httpx
-    if _installed_httpx:
+    global _httpx_installed
+    if _httpx_installed:
         return
 
     import atexit
@@ -128,7 +128,7 @@ def install_httpx(db_path: PathType, mode: ModeType):
     # monkey patching transport
     httpx.AsyncClient.__init__.__kwdefaults__["transport"] = transport
 
-    _installed_httpx = True
+    _httpx_installed = True
 
 
 def install_httpc(db_path: PathType, mode: ModeType):
