@@ -75,6 +75,7 @@ class Response(httpx.Response, ParseTool):
 
     @classmethod
     def from_httpx(cls, response: httpx.Response) -> Response:
+        response.encoding  # type: ignore  # noqa  # AttributeError: 'Headers' object has no attribute '_encoding' 오류를 피하기 위해 불러옴
         self = cls.__new__(cls)
         self.__dict__ = response.__dict__
         self._response = response
