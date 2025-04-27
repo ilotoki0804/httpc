@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from contextlib import suppress
 import typing
 
 import httpx
@@ -31,11 +32,13 @@ class ParseTool:
         if new:
             return HTMLParser(self.text)
 
-        try:
+        with suppress(AttributeError):
             return self._cache
-        except AttributeError:
-            self._cache = HTMLParser(self.text)
-            return self._cache
+
+        # 위의 코드와 합치면 간결하긴 하지만 text attribute가 없다는 예외가 발생할 경우
+        # traceback이 겹쳐서 보기 불편해짐
+        self._cache = HTMLParser(self.text)
+        return self._cache
 
     def match(self, query: str, *, new: bool = False) -> NodeBroadcastList:
         return BroadcastList(self.parse(new=new).css(query))  # type: ignore
