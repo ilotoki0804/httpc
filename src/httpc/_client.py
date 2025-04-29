@@ -228,7 +228,7 @@ class Client(HttpxClient):
                 logger.warning(f"Attempting fetch again ({type(exc).__name__})...")
                 exceptions.append(exc)
             else:
-                if not exceptions:
+                if exceptions:
                     logger.warning(f'Successfully retrieve "{request.url}"')
                 return Response.from_httpx(response)
 
