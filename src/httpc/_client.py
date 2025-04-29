@@ -228,8 +228,8 @@ class Client(HttpxClient):
                 logger.warning(f"Attempting fetch again ({type(exc).__name__})...")
                 exceptions.append(exc)
             else:
-                if exceptions:
-                    logger.warning(f"Successfully retrieve {request.url!r}")
+                if not exceptions:
+                    logger.warning(f'Successfully retrieve "{request.url}"')
                 return Response.from_httpx(response)
 
         if exceptions:
@@ -685,7 +685,7 @@ class AsyncClient(HttpxAsyncClient):
                 exceptions.append(exc)
             else:
                 if exceptions:
-                    logger.warning(f"Successfully retrieve {request.url!r}")
+                    logger.warning(f'Successfully retrieve "{request.url}"')
                 return Response.from_httpx(response)
 
         if exceptions:
