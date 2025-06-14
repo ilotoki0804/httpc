@@ -32,7 +32,7 @@ HEADERS = {
 }
 
 
-def _parse_curl(curl_command: str) -> tuple[str, dict[str, str], str | None]:
+def _parse_curl(curl_command: str) -> dict:
     command = shlex.split(curl_command)
     command = [arg for arg in reversed(command) if arg not in ("\n", "--compressed")]
 
@@ -45,6 +45,7 @@ def _parse_curl(curl_command: str) -> tuple[str, dict[str, str], str | None]:
     else:
         url = command.pop()
 
+    method = "GET"
     headers = {}
     data = None
     try:
@@ -65,6 +66,10 @@ def _parse_curl(curl_command: str) -> tuple[str, dict[str, str], str | None]:
                     data = command.pop()
                     continue
 
+                case "-X":
+                    method = command.pop()
+                    continue
+
                 case option:
                     value = command.pop()
                     raise ValueError(f"Unknown option {option!r} with value: {value!r}")
@@ -80,7 +85,7 @@ def _parse_curl(curl_command: str) -> tuple[str, dict[str, str], str | None]:
     except IndexError:
         pass
 
-    return url, headers, data
+    return dict(url=url, headers=headers, data=data, method=method)
 
 
 def _extract_headers_cli() -> None:
@@ -89,7 +94,8 @@ def _extract_headers_cli() -> None:
     data = ""
     while input_ := input():
         data += input_ + "\n"
-    url, headers, data = _parse_curl(data)
+    data = _parse_curl(data)
+    url, headers, data, method = data["url"], data["headers"], data["data"], data["method"]
 
     cookie = headers.get(key := "cookie", None) or headers.get(key := "Cookie", None)
     if cookie:
@@ -100,7 +106,10 @@ def _extract_headers_cli() -> None:
     console = Console()
 
     if url:
-        console.rule("[b]URL[/b]")
+        if method == "GET":
+            console.rule("[b]URL[/b]")
+        else:
+            console.rule(f"[b][blue]{method}[/blue] REQUEST[/b]")
         print(url)
 
     if cookie:
@@ -117,8 +126,8 @@ def _extract_headers_cli() -> None:
     console.rule("[b]Headers[/b]")
     # double quotes를 선호하기 위해 일부러 json.loads 사용
     # 일반적으로는 그냥 console.print만 사용해도 OK
-    # console.print(json.dumps(headers, indent=4, ensure_ascii=False))
-    console.print(headers)
+    console.print(json.dumps(headers, indent=4, ensure_ascii=False))
+    # console.print(headers)
 
 
 class FullDunder:
