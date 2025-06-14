@@ -126,7 +126,7 @@ def install_httpx(db_path: PathType, mode: ModeType):
     transport = transport_initializer.__enter__()
     atexit.register(transport_initializer.__exit__, None, None, None)
     # monkey patching transport
-    httpx.AsyncClient.__init__.__kwdefaults__["transport"] = transport
+    httpx.AsyncClient.__init__.__kwdefaults__["transport"] = transport  # type: ignore
 
     _httpx_installed = True
 
@@ -144,6 +144,6 @@ def install_httpc(db_path: PathType, mode: ModeType):
     transport = transport_initializer.__enter__()
     atexit.register(transport_initializer.__exit__, None, None, None)
     # monkey patching transport
-    httpc.AsyncClient.__init__.__kwdefaults__["transport"] = transport
+    httpc.AsyncClient.__init__.__kwdefaults__["transport"] = transport  # type: ignore
 
     _httpc_installed = True
