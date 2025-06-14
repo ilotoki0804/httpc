@@ -91,9 +91,9 @@ def _extract_headers_cli() -> None:
         data += input_ + "\n"
     url, headers, data = _parse_curl(data)
 
-    cookie = headers.get("cookie", None)
+    cookie = headers.get(key := "cookie", None) or headers.get(key := "Cookie", None)
     if cookie:
-        headers["cookie"] = "<cookie>"
+        headers[key] = "<cookie>"
 
     from rich.console import Console
 
