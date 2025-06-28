@@ -19,7 +19,8 @@ curl 'https://peps.python.org/pep-0649/' \
   --data-raw '{"operationName":"getLgMvnoMmlyRmndUsagsWithLimit","variables":{"contnum":"510150463935","limit":1},"query":"query getLgMvnoMmlyRmndUsagsWithLimit($contnum: String\u0021, $limit: Float) {\\n  getLgMvnoMmlyRmndUsagsWithLimit(contnum: $contnum, limit: $limit) {\\n    isSuccess\\n    code\\n    message\\n    data\\n    __typename\\n  }\\n}\\n'
 """
 
-    url, headers, data = _parse_curl(sample)
+    data = _parse_curl(sample)
+    url, headers, data, method = data["url"], data["headers"], data["data"], data["method"]
     assert url == "https://peps.python.org/pep-0649/"
     assert headers == {
         "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
@@ -37,3 +38,4 @@ curl 'https://peps.python.org/pep-0649/' \
     }
     expected = '{"operationName":"getLgMvnoMmlyRmndUsagsWithLimit","variables":{"contnum":"510150463935","limit":1},"query":"query getLgMvnoMmlyRmndUsagsWithLimit($contnum: String\\u0021, $limit: Float) {\\\\n  getLgMvnoMmlyRmndUsagsWithLimit(contnum: $contnum, limit: $limit) {\\\\n    isSuccess\\\\n    code\\\\n    message\\\\n    data\\\\n    __typename\\\\n  }\\\\n}\\\\n'
     assert data == expected
+    assert method == "GET"
