@@ -6,7 +6,7 @@ import re
 import shlex
 from abc import abstractmethod
 
-__version__ = "0.9.1.post1"
+__version__ = "0.10.0"
 
 logger = logging.getLogger("httpc")
 
