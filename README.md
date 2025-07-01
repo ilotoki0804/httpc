@@ -55,7 +55,7 @@ For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/St
 
 ## Release Note
 
-* 0.10.0: httpc-clean에서 method 입력 (-X)도 인식, ParseTool.extract_next_data 추가, 기타 버그 수정 및 리팩토링
+* 0.10.0.post1: httpc-clean에서 method 입력 (-X)도 인식, ParseTool.extract_next_data와 ParseTool.next_data 추가, httpc-next-data cli 추가, 기타 버그 수정 및 리팩토링
 * 0.9.1: 버그 수정 및 개선
 * 0.9.0: catcher에서 헤더가 다를 경우 다른 request로 취급하는 distinguish_headers 추가, ValueError 대신 RequestNotFoundError 사용, headers 최신화, 기타 리팩토링
 * 0.8.0: httpc-clean 기능 data와 cookie 파라미터도 받도록 확장, 파이썬 3.10 이상으로 지원 범위 좁힘, catcher.install 함수를 catcher.install_httpx으로 이름 변경, retry 설정 시 httpx의 오류에만 retry하도록 변경
