@@ -133,6 +133,7 @@ def _extract_headers_cli() -> None:
 def _extract_next_data_cli() -> None:
     import sys
     from pathlib import Path
+    _NOTSET = object()
 
     if len(sys.argv) == 1:
         print("Enter html text below.")
@@ -147,7 +148,7 @@ def _extract_next_data_cli() -> None:
         parser.add_argument("--include-prefixed", "-p", action="store_true")
         parser.add_argument("--include", "-i", action="append", type=str, default=[], help="Include only specific prefixes.")
         parser.add_argument("--exclude", "-x", action="append", type=str, default=[], help="Exclude specific prefixes.")
-        parser.add_argument("--outline", action="store_true", help="Show a outline for the data.")
+        parser.add_argument("--outline", nargs="?", type=int, default=_NOTSET, help="Show a outline for the data.")
         args = parser.parse_args()
         # return print(args)
 
@@ -172,7 +173,7 @@ def _extract_next_data_cli() -> None:
             console.print(item.value)
         return
 
-    if args.outline:
+    if args.outline is not _NOTSET:
         from rich.table import Table
 
         table = Table(title="Next Data Outline")
@@ -190,9 +191,10 @@ def _extract_next_data_cli() -> None:
             if not args.include_prefixed and item.prefix:
                 continue
             data_raw = json.dumps(item.value, ensure_ascii=False)
-            truncated = data_raw[:80]
-            if len(data_raw) < 80:
-                truncated = truncated + " " + "." * (80 - len(truncated))
+            truncated_limit = args.outline or 80
+            truncated = data_raw[:truncated_limit]
+            if len(data_raw) < truncated_limit:
+                truncated = truncated + " " + "." * (truncated_limit - len(truncated))
             if not args.include_prefixed:
                 table.add_row(item.hexdigit, str(len(data_raw)), truncated)
             else:
