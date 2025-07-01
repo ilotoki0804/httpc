@@ -69,7 +69,7 @@ class ParseTool:
         next_data = extract_next_data(scripts, prefix_to_ignore=prefix_to_ignore)
         return next_data
 
-    def next_data(self, exclude_prefixed: bool = True) -> dict[str, typing.Any]:
+    def next_data(self, *, exclude_prefixed: bool = True) -> dict[str, typing.Any]:
         prefix_to_ignore = ("HL", "I") if exclude_prefixed else None
         next_data = self.extract_next_data(prefix_to_ignore=prefix_to_ignore)
         return {
