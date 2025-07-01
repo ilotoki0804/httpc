@@ -130,6 +130,90 @@ def _extract_headers_cli() -> None:
     # console.print(headers)
 
 
+def _extract_next_data_cli() -> None:
+    import sys
+    from pathlib import Path
+
+    if len(sys.argv) == 1:
+        print("Enter html text below.")
+        text = ""
+        while input_ := input():
+            text += input_ + "\n"
+        args = None
+    else:
+        from argparse import ArgumentParser
+        parser = ArgumentParser(description="Extract next data from httpc script.")
+        parser.add_argument("file", type=Path, default=None, help="Path to the script file.")
+        parser.add_argument("--include-prefixed", "-p", action="store_true")
+        parser.add_argument("--include", "-i", action="append", type=str, default=[], help="Include only specific prefixes.")
+        parser.add_argument("--exclude", "-x", action="append", type=str, default=[], help="Exclude specific prefixes.")
+        parser.add_argument("--outline", action="store_true", help="Show a outline for the data.")
+        args = parser.parse_args()
+        # return print(args)
+
+        if args.file:
+            text = Path(args.file).read_text(encoding="utf-8")
+        else:
+            print("Enter html text below.")
+            text = ""
+            while input_ := input():
+                text += input_ + "\n"
+            args = None
+
+    from httpc import ParseTool
+    from rich.console import Console
+
+    console = Console()
+    data = ParseTool(text).extract_next_data()
+
+    if not args:
+        for item in data:
+            console.rule(f"[b]{item.hexdigit}[/b]")
+            console.print(item.value)
+        return
+
+    if args.outline:
+        from rich.table import Table
+
+        table = Table(title="Next Data Outline")
+        table.add_column("[blue]Hexdigit", style="cyan", no_wrap=True, justify="right")
+        if args.include_prefixed:
+            table.add_column("[blue]Prefix", style="magenta", no_wrap=True)
+        table.add_column("[blue]Length", style="green", justify="right")
+        table.add_column("[blue]Value Starting", style="green", justify="left")
+
+        for item in data:
+            if args.include and item.hexdigit not in args.include:
+                continue
+            if args.exclude and item.hexdigit in args.exclude:
+                continue
+            if not args.include_prefixed and item.prefix:
+                continue
+            data_raw = json.dumps(item.value, ensure_ascii=False)
+            truncated = data_raw[:80]
+            if len(data_raw) < 80:
+                truncated = truncated + " " + "." * (80 - len(truncated))
+            if not args.include_prefixed:
+                table.add_row(item.hexdigit, str(len(data_raw)), truncated)
+            else:
+                table.add_row(item.hexdigit, item.prefix, str(len(data_raw)), truncated)
+
+        console.print(table)
+        return
+
+    for item in data:
+        if args.include and item.hexdigit not in args.include:
+            continue
+        if args.exclude and item.hexdigit in args.exclude:
+            continue
+        if not args.include_prefixed and item.prefix:
+            continue
+        console.rule(f"[b]{item.hexdigit} start[/b]")
+        console.print(item.value)
+        console.rule(f"[b]{item.hexdigit} end  [/b]")
+    return
+
+
 class FullDunder:
     @abstractmethod
     def __getattr__(self, name: str, /):

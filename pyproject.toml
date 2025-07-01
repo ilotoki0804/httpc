@@ -28,6 +28,7 @@ catcher = ["zstd>=1.5.6.6"]
 
 [project.scripts]
 httpc-clean = "httpc._base:_extract_headers_cli"
+httpc-next-data = "httpc._base:_extract_next_data_cli"
 
 [tool.uv]
 dev-dependencies = [
