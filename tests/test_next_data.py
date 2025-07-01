@@ -82,11 +82,11 @@ def test_extract_next_data(parsed: ParseTool, scripts: list[str]):
     next_data = extract_next_data(scripts)
     assert next_data == DATA
 
-    assert parsed.extract_next_data(exclude_prefixed=False) == {
+    assert parsed.next_data(exclude_prefixed=False) == {
         data.hexdigit: data.value
         for data in DATA
     }
-    assert parsed.extract_next_data(exclude_prefixed=True) == {
+    assert parsed.next_data(exclude_prefixed=True) == {
         data.hexdigit: data.value
         for data in DATA
         if not data.prefix

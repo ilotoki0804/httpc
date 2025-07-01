@@ -3,7 +3,7 @@ from __future__ import annotations
 from contextlib import suppress
 import typing
 
-from httpc._next_data import extract_next_data
+from httpc._next_data import NextData, extract_next_data
 import httpx
 from selectolax.lexbor import LexborHTMLParser as HTMLParser
 from selectolax.lexbor import LexborNode as Node
@@ -64,10 +64,14 @@ class ParseTool:
         else:
             raise ValueError(f"Query {query!r} matched with {length} nodes{self._get_url_note()}.")
 
-    def extract_next_data(self, exclude_prefixed: bool = True) -> dict[str, typing.Any]:
-        prefix_to_ignore = ("HL", "I") if exclude_prefixed else None
-        scripts = [script.text() for script in self.match("script")]
+    def extract_next_data(self, prefix_to_ignore: typing.Container | None = None) -> list[NextData]:
+        scripts = [script.text(strip=True) for script in self.match("script")]
         next_data = extract_next_data(scripts, prefix_to_ignore=prefix_to_ignore)
+        return next_data
+
+    def next_data(self, exclude_prefixed: bool = True) -> dict[str, typing.Any]:
+        prefix_to_ignore = ("HL", "I") if exclude_prefixed else None
+        next_data = self.extract_next_data(prefix_to_ignore=prefix_to_ignore)
         return {
             data.hexdigit: data.value
             for data in next_data
