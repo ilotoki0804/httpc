@@ -1,14 +1,24 @@
+from collections import defaultdict
 import random
 from typing import Union
 
 from fastapi import FastAPI, HTTPException
 
 app = FastAPI()
+_fail_with_id_storage = defaultdict(int)
 
 
 @app.get("/random-fail")
 def read_root():
     if random.randrange(10) < 5:
+        raise HTTPException(500, "Internal Sever Error")
+    return {"Hello": "World"}
+
+
+@app.get("/success-after-fail/")
+def read_fail_with_id(attempt: int, id: str):
+    _fail_with_id_storage[id] += 1
+    if _fail_with_id_storage[id] < attempt:
         raise HTTPException(500, "Internal Sever Error")
     return {"Hello": "World"}
 
