@@ -149,6 +149,7 @@ def _extract_next_data_cli() -> None:
         parser.add_argument("--include", "-i", action="append", type=str, default=[], help="Include only specific prefixes.")
         parser.add_argument("--exclude", "-x", action="append", type=str, default=[], help="Exclude specific prefixes.")
         parser.add_argument("--outline", nargs="?", type=int, default=_NOTSET, help="Show a outline for the data.")
+        parser.add_argument("--no-rich-data", "-n", action="store_true", help="Do not use rich for data output.")
         args = parser.parse_args()
         # return print(args)
 
@@ -211,7 +212,10 @@ def _extract_next_data_cli() -> None:
         if not args.include_prefixed and item.prefix:
             continue
         console.rule(f"[b]{item.hexdigit} start[/b]")
-        console.print(item.value)
+        if args.no_rich_data:
+            print(item.value)
+        else:
+            console.print(item.value)
         console.rule(f"[b]{item.hexdigit} end  [/b]")
     return
 
