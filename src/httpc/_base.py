@@ -148,7 +148,7 @@ def _extract_next_data_cli() -> None:
         parser.add_argument("--include-prefixed", "-p", action="store_true")
         parser.add_argument("--include", "-i", action="append", type=str, default=[], help="Include only specific prefixes.")
         parser.add_argument("--exclude", "-x", action="append", type=str, default=[], help="Exclude specific prefixes.")
-        parser.add_argument("--outline", nargs="?", type=int, default=_NOTSET, help="Show a outline for the data.")
+        parser.add_argument("--overview", nargs="?", type=int, default=_NOTSET, help="Show data overview.")
         parser.add_argument("--no-rich-data", "-n", action="store_true", help="Do not use rich for data output.")
         args = parser.parse_args()
         # return print(args)
@@ -174,10 +174,10 @@ def _extract_next_data_cli() -> None:
             console.print(item.value)
         return
 
-    if args.outline is not _NOTSET:
+    if args.overview is not _NOTSET:
         from rich.table import Table
 
-        table = Table(title="Next Data Outline")
+        table = Table(title="Next Data Overview")
         table.add_column("[blue]Hexdigit", style="cyan", no_wrap=True, justify="right")
         if args.include_prefixed:
             table.add_column("[blue]Prefix", style="magenta", no_wrap=True)
@@ -192,7 +192,7 @@ def _extract_next_data_cli() -> None:
             if not args.include_prefixed and item.prefix:
                 continue
             data_raw = json.dumps(item.value, ensure_ascii=False)
-            truncated_limit = args.outline or 80
+            truncated_limit = args.overview or 80
             truncated = data_raw[:truncated_limit]
             if len(data_raw) < truncated_limit:
                 truncated = truncated + " " + "." * (truncated_limit - len(truncated))
