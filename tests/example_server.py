@@ -2,7 +2,7 @@ from collections import defaultdict
 import random
 from typing import Union
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException  # type: ignore
 
 app = FastAPI()
 _fail_with_id_storage = defaultdict(int)
