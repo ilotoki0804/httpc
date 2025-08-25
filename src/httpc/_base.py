@@ -126,7 +126,7 @@ def _extract_headers_cli() -> None:
     console.rule("[b]Headers[/b]")
     # double quotes를 선호하기 위해 일부러 json.loads 사용
     # 일반적으로는 그냥 console.print만 사용해도 OK
-    console.print(json.dumps(headers, indent=4, ensure_ascii=False))
+    console.print(json.dumps(headers, indent=4, ensure_ascii=False).replace('"<cookie>"', "cookie"))
     # console.print(headers)
 
 
