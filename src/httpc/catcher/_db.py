@@ -146,7 +146,11 @@ class TransactionDatabase(MutableMapping[httpx.Request, httpx.Response]):
             compressed BOOLEAN NOT NULL DEFAULT FALSE
         )
         """
-        self._get_size = f"SELECT COUNT (url) FROM {table}"
+        # TODO: 적용하기
+        self._build_index = f"""
+        CREATE INDEX IF NOT EXISTS {table}_idx (method, url, content)
+        """
+        self._get_size = f"SELECT COUNT() FROM {table}"
         self._lookup_key = f"""
         SELECT * FROM {table} WHERE (
             method = CAST(? AS TEXT)
