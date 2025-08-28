@@ -5,6 +5,7 @@ import logging
 import re
 import shlex
 from abc import abstractmethod
+import sys
 
 __version__ = "0.10.0.post1"
 
@@ -218,6 +219,25 @@ def _extract_next_data_cli() -> None:
             console.print(item.value)
         console.rule(f"[b]{item.hexdigit} end  [/b]")
     return
+
+
+def _extract_cookie_cli() -> None:
+    if len(sys.argv) == 1:
+        print("Enter cookie.txt (JSON format) below.")
+        text = ""
+        while input_ := input():
+            # text += input_ + "\n"
+            text += input_
+    else:
+        text = sys.argv[1]
+
+    cookies = json.loads(text.strip())
+    cookies_text = []
+    for cookie in cookies:
+        cookies_text.append(f'{cookie["name"]}={cookie["value"]}')
+    value = "; ".join(cookies_text)
+
+    print(f"'{value}'")
 
 
 class FullDunder:
