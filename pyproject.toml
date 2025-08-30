@@ -27,9 +27,7 @@ dynamic = ["version"]
 catcher = ["zstd>=1.5.6.6"]
 
 [project.scripts]
-httpc-clean = "httpc._base:_extract_headers_cli"
-httpc-next-data = "httpc._base:_extract_next_data_cli"
-httpc-cookie = "httpc._base:_extract_cookie_cli"
+httpc = "httpc.__main__:main"
 
 [tool.uv]
 dev-dependencies = [
