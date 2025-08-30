@@ -55,6 +55,7 @@ For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/St
 
 ## Release Note
 
+* 0.11.0: `httpc`를 통해 cli 접근, `httpc cookies` 추가, 기타 다양한 기능 개선
 * 0.10.0.post1: httpc-clean에서 method 입력 (-X)도 인식, ParseTool.extract_next_data와 ParseTool.next_data 추가, httpc-next-data cli 추가, 기타 버그 수정 및 리팩토링
 * 0.9.1: 버그 수정 및 개선
 * 0.9.0: catcher에서 헤더가 다를 경우 다른 request로 취급하는 distinguish_headers 추가, ValueError 대신 RequestNotFoundError 사용, headers 최신화, 기타 리팩토링

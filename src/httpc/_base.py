@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from abc import abstractmethod
 
-__version__ = "0.10.0.post1"
+__version__ = "0.11.0"
 
 logger = logging.getLogger("httpc")
 
