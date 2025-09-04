@@ -1,4 +1,4 @@
-from httpc._base import _parse_curl
+from httpc.__main__ import _parse_curl
 
 
 def test_extract_headers():
