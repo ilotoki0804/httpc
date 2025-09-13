@@ -77,7 +77,7 @@ class TransactionDatabase(MutableMapping[httpx.Request, httpx.Response]):
         AND json(headers) = json(CAST(? AS TEXT))
         AND content = CAST(? AS BLOB)
     )"""
-    _iter_keys = "SELECT (method, url, headers, content) FROM transactions WHERE type = ?"
+    _iter_keys = "SELECT method, url, headers, content FROM transactions WHERE type = ?"
     _delete_all = "DELETE FROM transactions WHERE type = ?"
     _add_compressed_column = "ALTER TABLE transactions ADD COLUMN compressed BOOLEAN NOT NULL DEFAULT FALSE"
     _iter_uncompressed = "SELECT ROWID, response FROM transactions WHERE type = ?, compressed == FALSE"
@@ -170,12 +170,12 @@ class TransactionDatabase(MutableMapping[httpx.Request, httpx.Response]):
         with suppress(sqlite3.OperationalError):
             self._cx.execute("PRAGMA journal_mode = wal")
 
+        if migrate_old_database:
+            self.migrate_old_database()
+
         if flagged == "rwc":
             self._execute(self._build_table)
             self._execute(self._build_index)
-
-        if migrate_old_database:
-            self.migrate_old_database()
 
     def migrate_old_database(self):
         with suppress(DBError):
@@ -193,12 +193,6 @@ class TransactionDatabase(MutableMapping[httpx.Request, httpx.Response]):
         if "transactions" in tables:
             return
 
-        # 새로운 데이터베이스에 필요한 type column이 있는 경우 migration이 이미 된 것이니 종료
-        with self._execute("SELECT sql FROM sqlite_schema WHERE name == ?", (tables[0],)) as cu:
-            sql, = cu.fetchone()
-            if "type" in sql:
-                return
-
         self._execute(self._build_table)
 
         for table in tables:
@@ -207,10 +201,10 @@ class TransactionDatabase(MutableMapping[httpx.Request, httpx.Response]):
             try:
                 self._execute(f"""INSERT INTO transactions (
                     type, method, url, headers, content, response, compressed
-                ) VALUES SELECT (
+                ) SELECT
                     ?, method, url, headers, content, response, compressed
-                ) FROM {table}
-                """, table)
+                FROM {table}
+                """, (table,))
             except DBError:
                 pass
             else:
