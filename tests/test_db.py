@@ -40,30 +40,32 @@ def test_catcher(compress):
 
 async def async_test_catcher(compress):
     db_path = RESOURCE_DIR / "test.db"
-    with TransactionDatabase(db_path, "transactions", compress_response=compress) as db:
-        transport = AsyncCatcherTransport(db, "hybrid")
-        async with httpc.AsyncClient(transport=transport) as client:
-            res = await client.get("https://www.google.com", headers={"hello": "world"})
-
-            req = httpx.Request("GET", "https://www.google.com", headers={"hello": "world"})
-            assert transport.db[req]
-
-            req = httpx.Request("GET", "https://www.google.com", headers={"hello": "NOT world"})
-            assert transport.db[req]
-
-            # 원래는 이렇게 중간에 distinguish_headers를 바꾸면 안 되지만 테스트를 간편화하기 위해 허용
-            transport.db.distinguish_headers = True
-
-            req = httpx.Request("GET", "https://www.google.com", headers=res.request.headers)
-            assert transport.db[req]
-
-            req = httpx.Request("GET", "https://www.google.com", headers={"hello": "NOT world"})
-            with pytest.raises(KeyError):
-                transport.db[req]
-
-            # test dropping table
-            transport.db.drop()
-            with pytest.raises(DBError, match="no such table: transactions"):
-                transport.db[req] = res
-
     db_path.unlink(missing_ok=True)
+
+    try:
+        with TransactionDatabase(db_path, "transactions", compress_response=compress) as db:
+            transport = AsyncCatcherTransport(db, "hybrid")
+            async with httpc.AsyncClient(transport=transport) as client:
+                res = await client.get("https://www.google.com", headers={"hello": "world"})
+
+                req = httpx.Request("GET", "https://www.google.com", headers={"hello": "world"})
+                assert transport.db[req]
+
+                req = httpx.Request("GET", "https://www.google.com", headers={"hello": "NOT world"})
+                assert transport.db[req]
+
+                # 원래는 이렇게 중간에 distinguish_headers를 바꾸면 안 되지만 테스트를 간편화하기 위해 허용
+                transport.db.distinguish_headers = True
+
+                req = httpx.Request("GET", "https://www.google.com", headers=res.request.headers)
+                assert transport.db[req]
+
+                req = httpx.Request("GET", "https://www.google.com", headers={"hello": "NOT world"})
+                with pytest.raises(KeyError):
+                    transport.db[req]
+
+                # test deleting entries
+                transport.db.delete_all()
+                assert len(transport.db) == 0
+    finally:
+        db_path.unlink(missing_ok=True)
