@@ -55,6 +55,7 @@ For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/St
 
 ## Release Note
 
+* 0.12.0: `httpc.catcher`의 데이터베이스 형식 변경, migration 추가, `httpc.catcher migrate` CLI 명령어 추가
 * 0.11.0: `httpc`를 통해 cli 접근, `httpc cookies` 추가, 기타 다양한 기능 개선
 * 0.10.0.post1: httpc-clean에서 method 입력 (-X)도 인식, ParseTool.extract_next_data와 ParseTool.next_data 추가, httpc-next-data cli 추가, 기타 버그 수정 및 리팩토링
 * 0.9.1: 버그 수정 및 개선
