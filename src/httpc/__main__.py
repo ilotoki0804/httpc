@@ -182,7 +182,7 @@ def _handle_next_data(args) -> None:
     from httpc import ParseTool
 
     console = Console()
-    text = ParseTool(text).extract_next_data()
+    text = ParseTool(text)._extract_next_data()
 
     if not args:
         for item in text:
@@ -208,7 +208,7 @@ def _handle_next_data(args) -> None:
             if not args.include_prefixed and item.prefix:
                 continue
             data_raw = json.dumps(item.value, ensure_ascii=False)
-            truncated_limit = int(args.overview) or 80
+            truncated_limit = int(args.overview or 80)
             truncated = data_raw[:truncated_limit]
             if len(data_raw) < truncated_limit:
                 truncated = truncated + " " + "." * (truncated_limit - len(truncated))

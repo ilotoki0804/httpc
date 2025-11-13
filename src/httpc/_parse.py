@@ -9,6 +9,7 @@ from selectolax.lexbor import LexborHTMLParser as HTMLParser
 from selectolax.lexbor import LexborNode as Node
 
 from ._broadcaster import BroadcastList
+from ._base import logger
 
 if typing.TYPE_CHECKING:
     from ._broadcaster import NodeBroadcastList
@@ -64,16 +65,19 @@ class ParseTool:
         else:
             raise ValueError(f"Query {query!r} matched with {length} nodes{self._get_url_note()}.")
 
-    def extract_next_data(self, prefix_to_ignore: typing.Container | None = None) -> list[NextData]:
+    def _extract_next_data(self, prefix_to_ignore: typing.Container | None = None) -> list[NextData]:
         scripts = [script.text(strip=True) for script in self.match("script")]
         next_data = extract_next_data(scripts, prefix_to_ignore=prefix_to_ignore)
         return next_data
 
-    def next_data(self, *, exclude_prefixed: bool = True) -> dict[str, typing.Any]:
+    def next_data(self, *, exclude_prefixed: bool = True, warn_unparsed: bool = True) -> dict[str, NextData]:
         prefix_to_ignore = ("HL", "I") if exclude_prefixed else None
-        next_data = self.extract_next_data(prefix_to_ignore=prefix_to_ignore)
+        next_data = self._extract_next_data(prefix_to_ignore=prefix_to_ignore)
+        for data in next_data:
+            if not data.parsed and warn_unparsed:
+                logger.warning(f"Failed to parse following data: {data.value}")
         return {
-            data.hexdigit: data.value
+            data.hexdigit: data
             for data in next_data
         }
 
