@@ -1,7 +1,7 @@
 # httpc
 
 [![Sponsoring](https://img.shields.io/badge/Sponsoring-Patreon-blue?logo=patreon&logoColor=white)](https://www.patreon.com/ilotoki0804)
-[![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Filotoki0804%2Fhttpc&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=false)](https://github.com/ilotoki0804/httpc)
+[![Hits](https://hitscounter.dev/api/hit?url=https%3A%2F%2Fgithub.com%2Filotoki0804%2Fhttpc&label=Hits&icon=github&color=%234dc81f)](https://github.com/ilotoki0804/httpc)
 [![PyPI - Downloads](https://img.shields.io/pypi/dm/httpc)](https://pypi.org/project/httpc/)
 [![image](https://img.shields.io/pypi/l/httpc.svg)](https://github.com/ilotoki0804/httpc/blob/main/LICENSE)
 [![image](https://img.shields.io/pypi/pyversions/httpc.svg)](https://pypi.org/project/httpc/)
