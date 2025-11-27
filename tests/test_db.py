@@ -34,10 +34,7 @@ def test_db():
 
 @pytest.mark.skip
 @pytest.mark.parametrize("compress", [False, True])
-def test_catcher(compress):
-    asyncio.run(async_test_catcher(compress=compress))
-
-
+@pytest.mark.asyncio
 async def async_test_catcher(compress):
     db_path = RESOURCE_DIR / "test.db"
     db_path.unlink(missing_ok=True)
