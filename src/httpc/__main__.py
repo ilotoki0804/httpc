@@ -7,8 +7,11 @@ import re
 import shlex
 import sys
 from argparse import ArgumentParser
+import typing
 
 from ._base import __version__, logger
+
+T = typing.TypeVar("T")
 
 parser = ArgumentParser("httpc", "Web development utilities")
 parser.add_argument("--version", action="version", version=__version__)
@@ -41,6 +44,62 @@ cookies_parser.add_argument(
     help="Path to the script file. Defaults to stdin.",
 )
 
+select_subparser = subparsers.add_parser("select", help="Select certain element by css from html input.")
+select_subparser.set_defaults(subparser_name="select")
+select_subparser.add_argument(
+    "file",
+    nargs="?",
+    default="-",
+    help="Path to the script file. Defaults to stdin.",
+)
+select_subparser.add_argument(
+    "--selector",
+    "-s",
+    required=True,
+    help="CSS selector for the file.",
+)
+select_subparser.add_argument(
+    "--all",
+    "-a",
+    action="store_true",
+    help="Select all of the matching element."
+)
+select_subparser.add_argument(
+    "--separator",
+    "--sep",
+    default="[rule]",
+    help="Separator for multiple elements."
+)
+select_subparser.add_argument(
+    "--single",
+    action="store_true",
+    help="Selected elements should be only one."
+)
+select_subparser.add_argument(
+    "--highlight",
+    help="Syntax highlight to a specific language.",
+)
+select_subparser.add_argument(
+    "--range",
+    "-r",
+    default="~",
+    help="Range to show elements",
+)
+select_subparser.add_argument(
+    "--attribute",
+    help="Get attribute of selected elements",
+)
+select_subparser.add_argument(
+    "--attributes",
+    action="store_true",
+    help="List attributes of selected elements",
+)
+select_subparser.add_argument(
+    "--text",
+    action="store_true",
+    help="Get text of selected elements",
+)
+
 
 def main() -> None:
     args = parser.parse_args()
@@ -56,8 +115,100 @@ def main() -> None:
             _handle_next_data(args)
         case "cookies":
             _handle_cookies(args)
+        case "select":
+            _handle_select(args)
         case other:
             logger.error(f"Invalid subparser name: {other}")
+
+
+def last_check(iterator: typing.Iterable[T]) -> typing.Iterator[tuple[bool, T]]:
+    iterator = iter(iterator)
+    is_first = True
+    is_last = False
+    last_item = None
+    item = None
+    while True:
+        try:
+            item = next(iterator)
+        except StopIteration:
+            is_last = True
+
+        if is_first:
+            is_first = False
+        else:
+            yield is_last, last_item  # type: ignore
+
+        last_item = item
+
+        if is_last:
+            break
+
+
+def _handle_select(args):
+    from pathlib import Path
+
+    if args.file == "-":
+        print("Enter html text below.")
+        text = get_input()
+    else:
+        text = Path(args.file).read_text("utf-8")
+
+    from rich.console import Console
+    from rich.syntax import Syntax
+
+    from httpc import ParseTool
+
+    console = Console()
+    parsed = ParseTool(text)
+
+    selected = parsed.match(args.selector)
+
+    if not selected:
+        console.print("[light_sky_blue1]No elements selected.")
+    elif args.all or args.range:
+        if False:
+            start, sep, end = "".partition("~")
+            start, end = int(start.strip() or "0"), int((is_end := end.strip()) or "0")
+            if is_end:
+                selected = selected[start + 1:end]
+            elif sep:
+                selected = selected[start + 1:]
+            else:
+                selected = [selected[start + 1]]
+    elif args.single and len(selected) > 1:
+        logger.error(f"There are {len(selected)} selected elements.")
+        return
+    else:
+        selected = selected[:1]
+
+    def print_with_syntax(text, default=None):
+        if text is None:
+            console.print("[light_sky_blue1]Nothing to print...")
+            return
+        if args.highlight in [".", "no", "false"]:
+            console.print(text)
+        elif not args.highlight and not default:
+            console.print(text)
+        else:
+            syntax = Syntax(text or "", args.highlight)
+            console.print(syntax)
+
+    for is_last, element in last_check(selected):
+        if args.text:
+            print_with_syntax(element.text())
+        elif args.attribute:
+            print_with_syntax(element.attrs.get(args.attribute))
+        elif args.attributes:
+            print_with_syntax(element.attributes)
+        else:
+            print_with_syntax(element.html, default=None)
+        if not is_last:
+            if not args.separator:
+                pass
+            elif args.separator.startswith("[rule]"):
+                console.rule(args.separator.removeprefix("[rule]"))
+            else:
+                console.print(args.separator.replace("\\n", "\n"))
 
 
 def get_input() -> str:
