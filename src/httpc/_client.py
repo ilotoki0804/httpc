@@ -16,7 +16,7 @@ from httpx._config import (
     Limits,
 )
 
-from ._base import logger
+from ._base import HEADERS, logger
 from ._parse import Response
 
 if typing.TYPE_CHECKING:
@@ -74,7 +74,7 @@ class Client(HttpxClient):
         super().__init__(
             auth=auth,
             params=params,
-            headers=headers,
+            headers=headers or HEADERS,
             cookies=cookies,
             verify=verify,
             cert=cert,
@@ -530,7 +530,7 @@ class AsyncClient(HttpxAsyncClient):
         super().__init__(
             auth=auth,
             params=params,
-            headers=headers,
+            headers=headers or HEADERS,
             cookies=cookies,
             verify=verify,
             cert=cert,
