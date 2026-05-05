@@ -9,6 +9,8 @@ import sys
 from argparse import ArgumentParser
 import typing
 
+from httpc.cookie_utils import cookie_json_to_raw
+
 from ._base import __version__, logger
 
 T = typing.TypeVar("T")
@@ -395,10 +397,7 @@ def _handle_cookies(args) -> None:
         text = Path(args.file).read_text("utf-8")
 
     cookies = json.loads(text.strip())
-    cookies_text = []
-    for cookie in cookies:
-        cookies_text.append(f'{cookie["name"]}={cookie["value"]}')
-    value = "; ".join(cookies_text)
+    value = cookie_json_to_raw(cookies)
 
     print(json.dumps(value))
 
