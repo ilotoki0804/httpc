@@ -55,6 +55,7 @@ For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/St
 
 ## Release Note
 
+* 0.14.0: `httpc select` subcommand 추가, 기본 headers 변경, cookie_utils 추가
 * 0.13.0: next_data 처리 방식 변경
 * 0.12.0: `httpc.catcher`의 데이터베이스 형식 변경, migration 추가, `httpc.catcher migrate` CLI 명령어 추가
 * 0.11.0: `httpc`를 통해 cli 접근, `httpc cookies` 추가, 기타 다양한 기능 개선
