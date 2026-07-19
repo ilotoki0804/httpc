@@ -262,14 +262,15 @@ def _parse_curl(curl_command: str) -> dict:
 
                 case option:
                     value = command.pop()
-                    raise ValueError(f"Unknown option {option!r} with value: {value!r}")
+                    logger.warning(f"Unknown option {option!r} with value: {value!r}")
 
             if name not in headers:
                 headers[name] = value
                 continue
 
-            if name.lower() != "cookie":
+            if name.lower() == "cookie":
                 headers[name] += f"; {value}"
+                continue
 
             raise ValueError(f"Duplicate header: {name}, new: {value!r}, old: {headers[name]!r}")
     except IndexError:
