@@ -55,6 +55,7 @@ For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/St
 
 ## Release Note
 
+* 0.14.0.post1: selectolax가 python3.15를 적용하지 않으므로 해당 내용을 requires-python에 반영
 * 0.14.0: `httpc select` subcommand 추가, 기본 headers 변경, cookie_utils 추가
 * 0.13.0: next_data 처리 방식 변경
 * 0.12.0: `httpc.catcher`의 데이터베이스 형식 변경, migration 추가, `httpc.catcher migrate` CLI 명령어 추가
