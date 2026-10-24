@@ -6,7 +6,7 @@ authors = [
 description = "httpx with css."
 license = "Apache-2.0"
 readme = "README.md"
-requires-python = ">=3.10,<3.15"  # selectolax currently does not support python 3.15
+requires-python = ">=3.10"
 keywords = ["httpx", "request", "css", "soup", "selectolax", "catcher"]
 classifiers = [
     "Typing :: Typed",
@@ -21,7 +21,8 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
-    "selectolax>=0.3.26",
+    'selectolax>=0.3.26; python_version < "3.16"',
+    'selectolax[cython]>=0.3.26; python_version >= "3.16"',
     "httpx>=0.28.0",
 ]
 dynamic = ["version"]
