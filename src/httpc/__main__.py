@@ -228,6 +228,8 @@ def _parse_curl(curl_command: str) -> dict:
 
     header_re = re.compile("(?P<name>[^:]+): (?P<value>.+)")
     assert command.pop() == "curl"
+    if command[-1] == "--url":
+        command.pop()
 
     # URL은 앞에도 마지막에도 있을 수 있음
     if command[-1] == "-H":
@@ -263,6 +265,7 @@ def _parse_curl(curl_command: str) -> dict:
                 case option:
                     value = command.pop()
                     logger.warning(f"Unknown option {option!r} with value: {value!r}")
+                    continue
 
             if name not in headers:
                 headers[name] = value
