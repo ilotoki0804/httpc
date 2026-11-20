@@ -11,6 +11,31 @@ from pathlib import Path
 
 import httpx2
 
+_zstd: typing.Any = None
+
+
+def _load_zstd() -> typing.Any:
+    global _zstd
+
+    if _zstd:
+        return _zstd
+
+    try:
+        from compression import zstd
+    except ModuleNotFoundError:
+        pass
+    else:
+        _zstd = zstd
+        return zstd
+
+    try:
+        import zstd  # type: ignore
+    except ModuleNotFoundError:
+        pass
+    else:
+        _zstd = zstd
+        return zstd
+
 
 class DBError(OSError):
     pass
@@ -126,17 +151,12 @@ class TransactionDatabase(MutableMapping[httpx2.Request, httpx2.Response]):
         # 따라서 compress_media는 False로 놓는 것이 대체로 맞을 것이다.
         self.compress_media = False
 
-        if self.compress_response:
-            import zstd
+        if typing.TYPE_CHECKING:
+            from compression import zstd
 
             self.zstd = zstd
         else:
-            try:
-                import zstd
-            except ModuleNotFoundError:
-                pass
-            else:
-                self.zstd = zstd
+            self.zstd = _load_zstd()
 
         if hasattr(self, "_cx"):
             raise DBError(_ERR_REINIT)

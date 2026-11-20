@@ -28,7 +28,9 @@ dependencies = [
 dynamic = ["version"]
 
 [project.optional-dependencies]
-catcher = ["zstd>=1.5.6.6"]
+catcher = [
+    'zstd>=1.5.6.6; python_version < "3.14"'
+]
 
 [project.scripts]
 httpc = "httpc.__main__:main"
