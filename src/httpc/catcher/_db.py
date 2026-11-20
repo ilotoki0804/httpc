@@ -12,6 +12,7 @@ from pathlib import Path
 import httpx2
 
 _zstd: typing.Any = None
+_aliased = False
 
 
 def _load_zstd() -> typing.Any:
@@ -35,6 +36,25 @@ def _load_zstd() -> typing.Any:
     else:
         _zstd = zstd
         return zstd
+
+
+def _alias_httpx():
+    global _aliased
+
+    if _aliased:
+        return
+
+    try:
+        import httpx  # type: ignore
+    except ModuleNotFoundError:
+        pass
+    else:
+        # import warnings
+        # warnings.warn("httpx should not be installed in order to avoid confusion")
+        return
+
+    httpx2.alias_httpx()
+    _aliased = True
 
 
 class DBError(OSError):
@@ -262,8 +282,8 @@ class TransactionDatabase(MutableMapping[httpx2.Request, httpx2.Response]):
         return response_dumped, compress
 
     def _restore_response(self, response: bytes, compressed: bool | None = None) -> httpx2.Response:
+        _alias_httpx()
         compressed = compressed if compressed is not None else self.compress_response
-        httpx2.alias_httpx()  # 기존에 httpx의 이름으로 pickle된 데이터를 불러오기 위해
         if compressed:
             return pickle.loads(self.zstd.decompress(response))
         else:
