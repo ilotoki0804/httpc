@@ -4,7 +4,7 @@ from contextlib import contextmanager, suppress
 from os import PathLike
 from typing import Literal
 
-import httpx
+import httpx2
 
 from ._db import TransactionDatabase
 
@@ -14,15 +14,15 @@ ContentKey = tuple[str, str, bytes]
 ModeType = Literal["store", "use", "hybrid", "passive"]
 
 DEFAULT_LOGGER = logging.getLogger(__name__)
-_httpx_installed = False
+_httpx2_installed = False
 _httpc_installed = False
 
 
 class RequestNotFoundError(ValueError):
-    request: httpx.Request
+    request: httpx2.Request
 
     @classmethod
-    def from_request(cls, request: httpx.Request):
+    def from_request(cls, request: httpx2.Request):
         method = "" if request.method == "GET" else request.method + " "
         content = request.content
         if not content:
@@ -36,7 +36,7 @@ class RequestNotFoundError(ValueError):
         return self
 
 
-class AsyncCatcherTransport(httpx.AsyncHTTPTransport):
+class AsyncCatcherTransport(httpx2.AsyncHTTPTransport):
     logger = DEFAULT_LOGGER
     valid_modes = "store", "use", "hybrid", "passive"
 
@@ -78,7 +78,7 @@ class AsyncCatcherTransport(httpx.AsyncHTTPTransport):
         ) as db:
             yield cls(db=db, mode=mode)
 
-    async def store_async_requests(self, request: httpx.Request, response: httpx.Response) -> None:
+    async def store_async_requests(self, request: httpx2.Request, response: httpx2.Response) -> None:
         # content에 대한 fetching이 무조건 끝나도록 강제함.
         # 대부분의 경우에는 flushing만으로도 충분하지만
         # content와 await 사이가 remote한 아주 일부 경우 (썸네일 다운로드 등) flushing으로 부족함.
@@ -86,7 +86,7 @@ class AsyncCatcherTransport(httpx.AsyncHTTPTransport):
         await response.aread()
         self.db[request] = response
 
-    def find_request(self, request: httpx.Request) -> httpx.Response:
+    def find_request(self, request: httpx2.Request) -> httpx2.Response:
         try:
             response = self.db[request]
         except KeyError:
@@ -96,7 +96,7 @@ class AsyncCatcherTransport(httpx.AsyncHTTPTransport):
         # response.stream = None
         return response
 
-    async def handle_async_request(self, request: httpx.Request) -> httpx.Response:
+    async def handle_async_request(self, request: httpx2.Request) -> httpx2.Response:
         if self.mode == "use":
             await request.aread()
             return self.find_request(request)
@@ -113,22 +113,22 @@ class AsyncCatcherTransport(httpx.AsyncHTTPTransport):
         return response
 
 
-def install_httpx(db_path: PathType, mode: ModeType):
-    global _httpx_installed
-    if _httpx_installed:
+def install_httpx2(db_path: PathType, mode: ModeType):
+    global _httpx2_installed
+    if _httpx2_installed:
         return
 
     import atexit
 
-    import httpx
+    import httpx2
 
     transport_initializer = AsyncCatcherTransport.with_db(db_path, mode)
     transport = transport_initializer.__enter__()
     atexit.register(transport_initializer.__exit__, None, None, None)
     # monkey patching transport
-    httpx.AsyncClient.__init__.__kwdefaults__["transport"] = transport  # type: ignore
+    httpx2.AsyncClient.__init__.__kwdefaults__["transport"] = transport  # type: ignore
 
-    _httpx_installed = True
+    _httpx2_installed = True
 
 
 def install_httpc(db_path: PathType, mode: ModeType):

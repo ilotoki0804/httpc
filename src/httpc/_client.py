@@ -5,11 +5,11 @@ import typing
 from contextlib import asynccontextmanager, contextmanager
 import warnings
 
-from httpx import AsyncClient as HttpxAsyncClient, Request
-from httpx import Client as HttpxClient
-from httpx import HTTPStatusError, RequestError, StreamError
-from httpx._client import USE_CLIENT_DEFAULT, EventHook, UseClientDefault
-from httpx._config import (
+from httpx2 import AsyncClient as HttpxAsyncClient, Request
+from httpx2 import Client as HttpxClient
+from httpx2 import HTTPStatusError, RequestError, StreamError
+from httpx2._client import USE_CLIENT_DEFAULT, EventHook, UseClientDefault
+from httpx2._config import (
     DEFAULT_LIMITS,
     DEFAULT_MAX_REDIRECTS,
     DEFAULT_TIMEOUT_CONFIG,
@@ -22,8 +22,8 @@ from ._parse import Response
 if typing.TYPE_CHECKING:
     import ssl as _ssl
 
-    from httpx._transports.base import AsyncBaseTransport, BaseTransport
-    from httpx._types import (
+    from httpx2._transports.base import AsyncBaseTransport, BaseTransport
+    from httpx2._types import (
         AuthTypes,
         CertTypes,
         CookieTypes,
@@ -36,7 +36,7 @@ if typing.TYPE_CHECKING:
         RequestFiles,
         TimeoutTypes,
     )
-    from httpx._urls import URL
+    from httpx2._urls import URL
 
     VerifyTypes = _ssl.SSLContext | str | bool
 
@@ -210,7 +210,7 @@ class Client(HttpxClient):
             response = super().send(request, stream=stream, auth=auth, follow_redirects=follow_redirects)
             if raise_for_status:
                 response.raise_for_status()
-            return Response.from_httpx(response)
+            return Response.from_httpx2(response)
 
         for _ in range(retry):
             try:
@@ -223,14 +223,14 @@ class Client(HttpxClient):
                     exceptions.append(exc)
                 else:
                     raise
-            # httpx의 다섯 Exception 중 미리 처리하는 HTTPStatusError와 retry의 대상이 아닌 InvalidURL, CookieConflict을 제외한 예외들
+            # httpx2의 다섯 Exception 중 미리 처리하는 HTTPStatusError와 retry의 대상이 아닌 InvalidURL, CookieConflict을 제외한 예외들
             except (RequestError, StreamError) as exc:
                 logger.warning(f"Attempting fetch again ({type(exc).__name__})...")
                 exceptions.append(exc)
             else:
                 if exceptions:
                     logger.warning(f'Successfully retrieve "{request.url}"')
-                return Response.from_httpx(response)
+                return Response.from_httpx2(response)
 
         if exceptions:
             if sys.version_info >= (3, 11):
@@ -260,7 +260,7 @@ class Client(HttpxClient):
         """
         Send a `GET` request.
 
-        **Parameters**: See `httpx.request`.
+        **Parameters**: See `httpx2.request`.
         """
         return self.request(
             "GET",
@@ -293,7 +293,7 @@ class Client(HttpxClient):
         """
         Send an `OPTIONS` request.
 
-        **Parameters**: See `httpx.request`.
+        **Parameters**: See `httpx2.request`.
         """
         return self.request(
             "OPTIONS",
@@ -326,7 +326,7 @@ class Client(HttpxClient):
         """
         Send a `HEAD` request.
 
-        **Parameters**: See `httpx.request`.
+        **Parameters**: See `httpx2.request`.
         """
         return self.request(
             "HEAD",
@@ -363,7 +363,7 @@ class Client(HttpxClient):
         """
         Send a `POST` request.
 
-        **Parameters**: See `httpx.request`.
+        **Parameters**: See `httpx2.request`.
         """
         return self.request(
             "POST",
@@ -404,7 +404,7 @@ class Client(HttpxClient):
         """
         Send a `PUT` request.
 
-        **Parameters**: See `httpx.request`.
+        **Parameters**: See `httpx2.request`.
         """
         return self.request(
             "PUT",
@@ -445,7 +445,7 @@ class Client(HttpxClient):
         """
         Send a `PATCH` request.
 
-        **Parameters**: See `httpx.request`.
+        **Parameters**: See `httpx2.request`.
         """
         return self.request(
             "PATCH",
@@ -482,7 +482,7 @@ class Client(HttpxClient):
         """
         Send a `DELETE` request.
 
-        **Parameters**: See `httpx.request`.
+        **Parameters**: See `httpx2.request`.
         """
         return self.request(
             "DELETE",
@@ -666,7 +666,7 @@ class AsyncClient(HttpxAsyncClient):
             response = await super().send(request, stream=stream, auth=auth, follow_redirects=follow_redirects)
             if raise_for_status:
                 response.raise_for_status()
-            return Response.from_httpx(response)
+            return Response.from_httpx2(response)
 
         for _ in range(retry):
             try:
@@ -679,14 +679,14 @@ class AsyncClient(HttpxAsyncClient):
                     exceptions.append(exc)
                 else:
                     raise
-            # httpx의 다섯 Exception 중 미리 처리하는 HTTPStatusError와 retry의 대상이 아닌 InvalidURL, CookieConflict을 제외한 예외들
+            # httpx2의 다섯 Exception 중 미리 처리하는 HTTPStatusError와 retry의 대상이 아닌 InvalidURL, CookieConflict을 제외한 예외들
             except (RequestError, StreamError) as exc:
                 logger.warning(f"Attempting fetch again ({type(exc).__name__})...")
                 exceptions.append(exc)
             else:
                 if exceptions:
                     logger.warning(f'Successfully retrieve "{request.url}"')
-                return Response.from_httpx(response)
+                return Response.from_httpx2(response)
 
         if exceptions:
             if sys.version_info >= (3, 11):
@@ -716,7 +716,7 @@ class AsyncClient(HttpxAsyncClient):
         """
         Send a `GET` request.
 
-        **Parameters**: See `httpx.request`.
+        **Parameters**: See `httpx2.request`.
         """
         return await self.request(
             "GET",
@@ -749,7 +749,7 @@ class AsyncClient(HttpxAsyncClient):
         """
         Send an `OPTIONS` request.
 
-        **Parameters**: See `httpx.request`.
+        **Parameters**: See `httpx2.request`.
         """
         return await self.request(
             "OPTIONS",
@@ -782,7 +782,7 @@ class AsyncClient(HttpxAsyncClient):
         """
         Send a `HEAD` request.
 
-        **Parameters**: See `httpx.request`.
+        **Parameters**: See `httpx2.request`.
         """
         return await self.request(
             "HEAD",
@@ -819,7 +819,7 @@ class AsyncClient(HttpxAsyncClient):
         """
         Send a `POST` request.
 
-        **Parameters**: See `httpx.request`.
+        **Parameters**: See `httpx2.request`.
         """
         return await self.request(
             "POST",
@@ -860,7 +860,7 @@ class AsyncClient(HttpxAsyncClient):
         """
         Send a `PUT` request.
 
-        **Parameters**: See `httpx.request`.
+        **Parameters**: See `httpx2.request`.
         """
         return await self.request(
             "PUT",
@@ -901,7 +901,7 @@ class AsyncClient(HttpxAsyncClient):
         """
         Send a `PATCH` request.
 
-        **Parameters**: See `httpx.request`.
+        **Parameters**: See `httpx2.request`.
         """
         return await self.request(
             "PATCH",
@@ -938,7 +938,7 @@ class AsyncClient(HttpxAsyncClient):
         """
         Send a `DELETE` request.
 
-        **Parameters**: See `httpx.request`.
+        **Parameters**: See `httpx2.request`.
         """
         return await self.request(
             "DELETE",

@@ -4,6 +4,8 @@ from ._broadcaster import BroadcastList
 from ._client import AsyncClient, Client
 from ._next_data import NextData, extract_next_data
 from ._parse import ParseTool, Response
+from httpx2._exceptions import *
+from httpx2 import URL
 
 __all__ = [
     "delete",

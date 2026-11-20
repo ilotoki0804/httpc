@@ -3,11 +3,11 @@ name = "httpc"
 authors = [
     {name = "ilotoki0804", email = "ilotoki0804@gmail.com"},
 ]
-description = "httpx with css."
+description = "httpx2 with css."
 license = "Apache-2.0"
 readme = "README.md"
 requires-python = ">=3.10"
-keywords = ["httpx", "request", "css", "soup", "selectolax", "catcher"]
+keywords = ["httpx", "httpx2", "request", "css", "soup", "selectolax", "catcher"]
 classifiers = [
     "Typing :: Typed",
     "License :: OSI Approved :: Apache Software License",
@@ -23,7 +23,7 @@ classifiers = [
 dependencies = [
     'selectolax>=0.3.26; python_version < "3.16"',
     'selectolax[cython]>=0.3.26; python_version >= "3.16"',
-    "httpx>=0.28.0",
+    "httpx2>=2.16.2",
 ]
 dynamic = ["version"]
 

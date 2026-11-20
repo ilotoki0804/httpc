@@ -1,7 +1,7 @@
 import asyncio
 from pathlib import Path
 
-import httpx
+import httpx2
 import pytest
 
 import httpc
@@ -16,8 +16,8 @@ def test_db():
     db_path = RESOURCE_DIR / "test.db"
     db = TransactionDatabase(db_path, "Test")
     try:
-        req = httpx.Request("GET", "https://hello.world", content=b"hello world content")
-        res = httpx.Response(200, text="hello, world!")
+        req = httpx2.Request("GET", "https://hello.world", content=b"hello world content")
+        res = httpx2.Response(200, text="hello, world!")
         db[req] = res
         fetched_res = db[req]
         # 일관성을 유지하기 어려운 파라미터 제거
@@ -45,19 +45,19 @@ async def test_catcher(compress):
             async with httpc.AsyncClient(transport=transport) as client:
                 res = await client.get("https://www.google.com", headers={"hello": "world"})
 
-                req = httpx.Request("GET", "https://www.google.com", headers={"hello": "world"})
+                req = httpx2.Request("GET", "https://www.google.com", headers={"hello": "world"})
                 assert transport.db[req]
 
-                req = httpx.Request("GET", "https://www.google.com", headers={"hello": "NOT world"})
+                req = httpx2.Request("GET", "https://www.google.com", headers={"hello": "NOT world"})
                 assert transport.db[req]
 
                 # 원래는 이렇게 중간에 distinguish_headers를 바꾸면 안 되지만 테스트를 간편화하기 위해 허용
                 transport.db.distinguish_headers = True
 
-                req = httpx.Request("GET", "https://www.google.com", headers=res.request.headers)
+                req = httpx2.Request("GET", "https://www.google.com", headers=res.request.headers)
                 assert transport.db[req]
 
-                req = httpx.Request("GET", "https://www.google.com", headers={"hello": "NOT world"})
+                req = httpx2.Request("GET", "https://www.google.com", headers={"hello": "NOT world"})
                 with pytest.raises(KeyError):
                     transport.db[req]
 

@@ -3,12 +3,12 @@ from __future__ import annotations
 import typing
 from contextlib import contextmanager
 
-from httpx._config import DEFAULT_TIMEOUT_CONFIG
+from httpx2._config import DEFAULT_TIMEOUT_CONFIG
 
 if typing.TYPE_CHECKING:
     import ssl as _ssl
 
-    from httpx._types import (
+    from httpx2._types import (
         AuthTypes,
         CertTypes,
         CookieTypes,
@@ -20,7 +20,7 @@ if typing.TYPE_CHECKING:
         RequestFiles,
         TimeoutTypes,
     )
-    from httpx._urls import URL
+    from httpx2._urls import URL
 
     VerifyTypes = _ssl.SSLContext | str | bool
 

@@ -9,7 +9,7 @@ from collections.abc import MutableMapping
 from contextlib import closing, suppress
 from pathlib import Path
 
-import httpx
+import httpx2
 
 
 class DBError(OSError):
@@ -24,7 +24,7 @@ if typing.TYPE_CHECKING:
     NoHeadersRequestTuple = tuple[str, str, str, bytes]
 
 
-class TransactionDatabase(MutableMapping[httpx.Request, httpx.Response]):
+class TransactionDatabase(MutableMapping[httpx2.Request, httpx2.Response]):
     _MEDIA_TYPES = ("image/", "video/", "audio/")
     _build_table = """
     CREATE TABLE IF NOT EXISTS transactions (
@@ -227,7 +227,7 @@ class TransactionDatabase(MutableMapping[httpx.Request, httpx.Response]):
             uri = uri.replace("//", "/")
         return uri
 
-    def _prepare_response(self, response: httpx.Response) -> tuple[bytes, bool]:
+    def _prepare_response(self, response: httpx2.Response) -> tuple[bytes, bool]:
         # TODO: pickler 직접 만들어서
         response_dumped = pickle.dumps(response, protocol=self._protocol)
         if self.compress_response and self.compress_media:
@@ -241,30 +241,31 @@ class TransactionDatabase(MutableMapping[httpx.Request, httpx.Response]):
 
         return response_dumped, compress
 
-    def _restore_response(self, response: bytes, compressed: bool | None = None) -> httpx.Response:
+    def _restore_response(self, response: bytes, compressed: bool | None = None) -> httpx2.Response:
         compressed = compressed if compressed is not None else self.compress_response
+        httpx2.alias_httpx()  # 기존에 httpx의 이름으로 pickle된 데이터를 불러오기 위해
         if compressed:
             return pickle.loads(self.zstd.decompress(response))
         else:
             return pickle.loads(response)
 
-    def _disassemble_request(self, request: httpx.Request) -> RequestTuple:
+    def _disassemble_request(self, request: httpx2.Request) -> RequestTuple:
         return self.transaction_type, request.method, str(request.url), json.dumps(dict(request.headers)), request.content
 
-    def _disassemble_request_without_headers(self, request: httpx.Request) -> NoHeadersRequestTuple:
+    def _disassemble_request_without_headers(self, request: httpx2.Request) -> NoHeadersRequestTuple:
         return self.transaction_type, request.method, str(request.url), request.content
 
     @staticmethod
-    def _assemble_request(request_tuple: RequestTuple) -> httpx.Request:
+    def _assemble_request(request_tuple: RequestTuple) -> httpx2.Request:
         _, method, url, headers, content = request_tuple
-        return httpx.Request(method, url, headers=json.loads(headers), content=content)
+        return httpx2.Request(method, url, headers=json.loads(headers), content=content)
 
     def __len__(self) -> int:
         with self._execute(self._get_size, (self.transaction_type,)) as cu:
             row = cu.fetchone()
         return row[0]
 
-    def __getitem__(self, request: httpx.Request) -> httpx.Response:
+    def __getitem__(self, request: httpx2.Request) -> httpx2.Response:
         if self.distinguish_headers:
             with self._execute(self._lookup_key_with_headers, self._disassemble_request(request)) as cu:
                 row = cu.fetchone()
@@ -277,12 +278,12 @@ class TransactionDatabase(MutableMapping[httpx.Request, httpx.Response]):
         _, method, url, headers, content, response, compressed = row
         return self._restore_response(response, compressed)
 
-    def __setitem__(self, request: httpx.Request, response: httpx.Response) -> None:
+    def __setitem__(self, request: httpx2.Request, response: httpx2.Response) -> None:
         with suppress(KeyError):
             del self[request]
         self._execute(self._store_kv, (*self._disassemble_request(request), *self._prepare_response(response)))
 
-    def __delitem__(self, request: httpx.Request) -> None:
+    def __delitem__(self, request: httpx2.Request) -> None:
         if self.distinguish_headers:
             with self._execute(self._delete_key_with_headers, self._disassemble_request(request)) as cu:
                 if not cu.rowcount:
@@ -292,7 +293,7 @@ class TransactionDatabase(MutableMapping[httpx.Request, httpx.Response]):
                 if not cu.rowcount:
                     raise KeyError(request)
 
-    def __iter__(self) -> typing.Iterator[httpx.Request]:
+    def __iter__(self) -> typing.Iterator[httpx2.Request]:
         try:
             with self._execute(self._iter_keys, (self.transaction_type,)) as cu:
                 for row in cu:
@@ -325,7 +326,7 @@ class TransactionDatabase(MutableMapping[httpx.Request, httpx.Response]):
         except sqlite3.Error as exc:
             raise DBError(str(exc)) from None
 
-    def keys(self) -> list[httpx.Request]:
+    def keys(self) -> list[httpx2.Request]:
         return list(super().keys())
 
     def __enter__(self) -> typing.Self:

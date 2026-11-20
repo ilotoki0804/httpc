@@ -4,7 +4,7 @@ from contextlib import suppress
 import typing
 
 from httpc._next_data import NextData, extract_next_data
-import httpx
+import httpx2
 from selectolax.lexbor import LexborHTMLParser as HTMLParser
 from selectolax.lexbor import LexborNode as Node
 
@@ -91,11 +91,11 @@ class ParseTool:
         return url_note
 
 
-class Response(httpx.Response, ParseTool):
-    _response: httpx.Response
+class Response(httpx2.Response, ParseTool):
+    _response: httpx2.Response
 
     @classmethod
-    def from_httpx(cls, response: httpx.Response) -> Response:
+    def from_httpx2(cls, response: httpx2.Response) -> Response:
         response.encoding  # type: ignore  # noqa  # AttributeError: 'Headers' object has no attribute '_encoding' 오류를 피하기 위해 불러옴
         self = cls.__new__(cls)
         self.__dict__ = response.__dict__
