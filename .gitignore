@@ -3,6 +3,7 @@ _ignore*
 ._ignore*
 webtoon/
 .DS_Store
+tests/resources/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
