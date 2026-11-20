@@ -7,6 +7,7 @@
 [![image](https://img.shields.io/pypi/pyversions/httpc.svg)](https://pypi.org/project/httpc/)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/ilotoki0804/httpc/blob/main/pyproject.toml)
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/ilotoki0804/httpc/blob/main/pyproject.toml)
+
 **httpx2 with CSS**
 
 ## Installation
@@ -54,6 +55,7 @@ For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/St
 
 ## Release Note
 
+* 0.15.1: 가능한 경우 catcher에서 compression.zstd 사용, 기타 alias 관련 최적화
 * 0.15.0: httpx2를 의존성으로 사용 및 일부 의존성 확장
 * 0.14.0.post1: selectolax가 python3.15를 적용하지 않으므로 해당 내용을 requires-python에 반영
 * 0.14.0: `httpc select` subcommand 추가, 기본 headers 변경, cookie_utils 추가
