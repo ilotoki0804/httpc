@@ -7,8 +7,7 @@
 [![image](https://img.shields.io/pypi/pyversions/httpc.svg)](https://pypi.org/project/httpc/)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/ilotoki0804/httpc/blob/main/pyproject.toml)
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/ilotoki0804/httpc/blob/main/pyproject.toml)
-
-**httpx with CSS**
+**httpx2 with CSS**
 
 ## Installation
 
@@ -43,18 +42,19 @@ Successfully retrieve 'https://hypothetical-unstable-website.com/'
 >>> httpc.get("https://httpbin.org/status/400")
 <Response [400 BAD REQUEST]>
 >>> httpc.get("https://httpbin.org/status/400", raise_for_status=True)  # raise_for_status as parameter
-httpx.HTTPStatusError: Client error '400 BAD REQUEST' for url 'https://httpbin.org/status/400'
+httpx2.HTTPStatusError: Client error '400 BAD REQUEST' for url 'https://httpbin.org/status/400'
 For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400
 >>> httpc.get("https://httpbin.org/status/500", raise_for_status=True, retry=3)
 Attempting fetch again (status code 500)...
 Attempting fetch again (status code 500)...
 Attempting fetch again (status code 500)...
-httpx.HTTPStatusError: Server error '500 INTERNAL SERVER ERROR' for url 'https://httpbin.org/status/500'
+httpx2.HTTPStatusError: Server error '500 INTERNAL SERVER ERROR' for url 'https://httpbin.org/status/500'
 For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500
 ```
 
 ## Release Note
 
+* 0.15.0: httpx2를 의존성으로 사용 및 일부 의존성 확장
 * 0.14.0.post1: selectolax가 python3.15를 적용하지 않으므로 해당 내용을 requires-python에 반영
 * 0.14.0: `httpc select` subcommand 추가, 기본 headers 변경, cookie_utils 추가
 * 0.13.0: next_data 처리 방식 변경
